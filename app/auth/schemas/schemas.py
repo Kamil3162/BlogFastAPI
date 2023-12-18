@@ -1,4 +1,8 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional, TypeVar
+
+T = TypeVar('T')
+
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -6,7 +10,8 @@ class UserCreate(BaseModel):
     last_name: str
     password: str
 
-class User(BaseModel):
+
+class UserResponse(BaseModel):
     id: int
     email: EmailStr
     first_name: str
@@ -14,10 +19,31 @@ class User(BaseModel):
     is_active: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+class UserSchemeOfficial(BaseModel):
+    email: EmailStr
+    first_name: str
+    last_name: str
+    is_active: bool
+
+
+class UserHashPassword(UserSchemeOfficial):
+    hashed_password: str
 
 
 class UserUpdate(BaseModel):
-    first_name: str = None
-    last_name: str = None
-    is_active: bool = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class RequestUserCreate(BaseModel):
+    parameters: UserCreate = Field(...)
+
+
+class Response:
+    code: int
+    status: str
+    message: str
