@@ -2,21 +2,20 @@ import datetime
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from utils.utils import get_db
+from BlogFastAPI.app.utils.utils import get_db,decode_jwt
 from passlib.context import CryptContext
 from passlib.hash import sha256_crypt
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from fastapi import FastAPI, HTTPException,status
+from fastapi import FastAPI, HTTPException, status
 from ..schemas.token_schemas import TokenData, TokenStatus
 from fastapi import Depends
 from typing import Optional, Annotated
 from jose import jwt, JWTError
-from utils.utils import decode_jwt
 from sqlalchemy.orm import Session
-
+from BlogFastAPI.app.utils.responses import HTTP_EXCEPTION
 import datetime
 
-from db.models.models import User
+from BlogFastAPI.app.db.models.models import User
 
 config_file = Path(__file__).parent.parent / 'config.env'
 load_dotenv(config_file)
@@ -27,23 +26,16 @@ async def get_current_user(
         token: str = Depends(oauth2_scheme),
         db: Session = Depends(get_db)  # Injecting the database session here
 ):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
-        payload = jwt.decode(token, str(os.getenv("SECRET_KEY")), algorithms=["HS256"])
+        payload = decode_jwt(token)
         email = payload["sub"]
-        if email is None:
-            raise credentials_exception
         token_data = TokenData(email=email)
     except JWTError:
-        raise credentials_exception
+        raise JWTError("Problem with JWT TOKEN")
 
     user = USER_AUTH.get_user(email=token_data.email, db=db)
     if user is None:
-        raise credentials_exception
+        raise HTTP_EXCEPTION
     return user
 
 async def check_token_status(
@@ -56,7 +48,6 @@ async def check_token_status(
         return token_data
     except JWTError:
         return TokenStatus(is_valid=False)
-
 
 
 class UserAuth:
@@ -79,7 +70,7 @@ class UserAuth:
             return False
         return user
 
-    def authenticate_user(self, db,email: str, password: str):
+    def authenticate_user(self, db, email: str, password: str):
         user = self.get_user(email=email, db=db)
         if not user:
             return False
@@ -89,6 +80,12 @@ class UserAuth:
 
     def create_access_token(self, data: dict,
                             expires_delta: Optional[datetime.timedelta] = None):
+        """
+
+        :param data:
+        :param expires_delta:
+        :return:
+        """
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.datetime.utcnow() + expires_delta
@@ -97,6 +94,9 @@ class UserAuth:
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_jwt
+
+    def decode_access_token(self, token):
+        return jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
 
     async def get_current_active_user(
         self, current_user: Annotated[User, Depends(get_current_user)]

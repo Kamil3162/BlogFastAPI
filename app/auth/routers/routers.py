@@ -1,10 +1,9 @@
 from fastapi import HTTPException, Response, Request, APIRouter, status, Depends
-# from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from ..schemas.schemas import UserCreate, UserResponse
 from ..user_manager.user_auth import USER_AUTH
-from db.models.models import User
-from utils.utils import get_db
+from BlogFastAPI.app.db.models.models import User
+from BlogFastAPI.app.utils.utils import get_db
 
 router = APIRouter()
 
@@ -16,7 +15,7 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
     hashed_password = USER_AUTH.get_hash_password(user.password)
     db_user = User(email=user.email, first_name=user.first_name,
-                     last_name=user.last_name, hashed_password=hashed_password)
+                   last_name=user.last_name, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

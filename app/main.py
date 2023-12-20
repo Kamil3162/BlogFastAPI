@@ -1,21 +1,20 @@
 import uvicorn
-import os
+import sys
+import json
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from pathlib import Path
-from core.config import env_path1, settings
-from auth.routers.routers import router
-from auth.routers.authentication_routers import auth_router
-from db.database import (
+from ..app.core.config import env_path1, settings
+from ..app.auth.routers.routers import router
+from ..app.auth.routers.authentication_routers import auth_router
+from ..app.db.database import (
     SQLALCHEMY_DATABASE_URL,
     Base,
-    execute_db_migrations,
-    connection_checker,
     SessionLocal,
     engine
 )
-from db.models import models
-from utils.utils import get_db
+from ..app.db.models import models
+from ..app.utils.utils import get_db
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -26,12 +25,10 @@ app.include_router(auth_router)
 env_path = Path(__file__).parent / 'config.env'
 
 load_dotenv(dotenv_path=env_path)
-# connection_checker()
-# execute_db_migrations()
-
 
 @app.get('/')
 async def home():
+    print(sys.path)
     return {'key': 'value'}
 
 
@@ -40,6 +37,7 @@ async def webchat_app():
     print(settings.POSTGRES_DB)
     print(get_db())
     return {'web_chat':'application'}
+
 
 @app.get("/items/{item_id}")
 async def read_user_item(item_id: str, needy: str):
@@ -56,16 +54,6 @@ async def read_user_item(item_id: str, needy: str):
 async def users():
     pass
 
-
-
-# @app.post("/users/")
-# def create_user(username: str, email: str, db: Session = Depends(get_db)):
-#     db_user = User(username=username, email=email)
-#     db.add(db_user)
-#     db.commit()
-#     db.refresh(db_user)
-#     return db_user
-
-
+#
 if __name__ == "__main__":
     uvicorn.run(app, port=10000)

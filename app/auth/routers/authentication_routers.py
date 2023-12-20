@@ -14,9 +14,9 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from typing import Annotated, Union
-from utils.utils import get_db
+from BlogFastAPI.app.utils.utils import get_db
 from datetime import datetime, timedelta
-from db.models.models import User
+from BlogFastAPI.app.db.models.models import User
 from ..user_manager.user_auth import USER_AUTH, oauth2_scheme,check_token_status
 
 auth_router = APIRouter()
