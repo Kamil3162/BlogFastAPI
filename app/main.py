@@ -4,17 +4,17 @@ import json
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from pathlib import Path
-from ..app.core.config import env_path1, settings
-from ..app.auth.routers.routers import router
-from ..app.auth.routers.authentication_routers import auth_router
-from ..app.db.database import (
+from .core.config import env_path1, settings
+from .auth.routers.routers import router
+from .auth.routers.authentication_routers import auth_router
+from .db.database import (
     SQLALCHEMY_DATABASE_URL,
     Base,
     SessionLocal,
     engine
 )
-from ..app.db.models import models
-from ..app.utils.utils import get_db
+from .db.models import models
+from .utils.utils import get_db
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -36,7 +36,7 @@ async def home():
 async def webchat_app():
     print(settings.POSTGRES_DB)
     print(get_db())
-    return {'web_chat':'application'}
+    return {'web_chat': 'application'}
 
 
 @app.get("/items/{item_id}")

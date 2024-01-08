@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional, TypeVar
-
+from datetime import datetime
 T = TypeVar('T')
 
 
@@ -38,6 +38,14 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     is_active: Optional[bool] = None
 
+class BlacklistedUserSchema(BaseModel):
+    id: int
+    user_id: int
+    blocked_date: datetime
+    reason: str
+
+    class Config:
+        from_attributes = True
 
 class RequestUserCreate(BaseModel):
     parameters: UserCreate = Field(...)

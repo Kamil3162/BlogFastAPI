@@ -14,10 +14,10 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from typing import Annotated, Union
-from BlogFastAPI.app.utils.utils import get_db
+from BlogFastAPI.app.utils.utils import get_db, revoke_token
 from datetime import datetime, timedelta
 from BlogFastAPI.app.db.models.models import User
-from ..user_manager.user_auth import USER_AUTH, oauth2_scheme,check_token_status
+from ..user_manager.user_auth import USER_AUTH, oauth2_scheme, check_token_status
 
 auth_router = APIRouter()
 
@@ -68,3 +68,9 @@ async def test(token: Annotated[str, Depends(oauth2_scheme)]):
     :return:
     """
     return {'token_pass': token}
+
+@auth_router.get('/logout')
+async def logout(token: Annotated[str, Depends(oauth2_scheme)],
+                 db: Session = Depends(get_db)):
+    blocked_token = revoke_token(db, token)
+    return {'blocked_token': blocked_token, 'logout': 'success'}

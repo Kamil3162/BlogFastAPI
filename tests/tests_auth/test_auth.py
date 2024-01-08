@@ -7,21 +7,30 @@ from BlogFastAPI.app.auth.user_manager.user_auth import (
     oauth2_scheme
 )
 from .config import client
+import pytest
 
-def test_email_user_duplication():
-    """
-        Function to check create user in db using the same data
-    :return:
-    """
-    pass
+@pytest.fixture(scope="module")
+def test_user():
+    user_test_data = {
+        "email": "testuser@example.com",
+        "first_name": "John",
+        "last_name": "Doe",
+        "password": "password123"
+    }
 
-def test_token_status():
-    pass
+    # Create user
+    response = client.post("/register", json=user_test_data)
+    assert response.status_code == 200
+
+    return user_test_data
+def test_login_url(test_user):
+    login_data = {
+        "username": test_user["email"],
+        "password": test_user["password"]
+    }
+
+    response = client.post("/token", data=login_data)
+    assert response.status_code == 200
+    assert "access_token" in response.json()
 
 
-def test_login():
-    pass
-
-def test_user_datamodel(): pass
-
-def test_all_user_fields(): pass
