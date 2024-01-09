@@ -7,6 +7,7 @@ from pathlib import Path
 from .core.config import env_path1, settings
 from .auth.routers.routers import router
 from .auth.routers.authentication_routers import auth_router
+from .auth.routers.create_routers import create_post_router
 from .db.database import (
     SQLALCHEMY_DATABASE_URL,
     Base,
@@ -21,6 +22,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 app.include_router(router)
 app.include_router(auth_router)
+app.include_router(create_post_router)
 
 env_path = Path(__file__).parent / 'config.env'
 

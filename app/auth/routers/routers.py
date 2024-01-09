@@ -10,6 +10,7 @@ router = APIRouter()
 
 @router.post('/register', response_model=UserResponse)
 async def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    # success - create a new account for our blog user
     db_user = db.query(User).filter(User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -25,12 +26,6 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.get('/blacklisted-user/', response_model=BlacklistedUserSchema)
 async def blacklisted_users(db: Session = Depends(get_db)):
-    # add here instance to return
-    # print("testowanie")
-    # print("testowanie")
-    # print("testowanie")
-    # users = UserService.blacklisted_users(db)
-    # return users
     return {"message": "Function entered"}  # Temporary line for testing
 
 

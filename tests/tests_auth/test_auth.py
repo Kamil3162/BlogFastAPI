@@ -20,6 +20,7 @@ def test_user():
 
     # Create user
     response = client.post("/register", json=user_test_data)
+    print(response)
     assert response.status_code == 200
 
     return user_test_data

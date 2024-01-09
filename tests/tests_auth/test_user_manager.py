@@ -9,7 +9,7 @@ USER_DATA = {
     "email": "test@example.com",
     "first_name": "John",
     "last_name": "Doe",
-    "password": "password123"
+    "hashed_password": "password123"
 }
 
 @pytest.fixture
@@ -59,9 +59,13 @@ def test_access_token_creation(user_manager):
 
 def test_get_user(user_manager):
     with SessionLocal() as db_test_connection:
+
+        hashed_password = user_manager.get_hash_password(USER_DATA['hashed_password'])
+        USER_DATA['hashed_password'] = hashed_password
+
         user_test_db = User(**USER_DATA)
         user_test_db.hashed_password = user_manager.get_hash_password(
-            USER_DATA["password"]
+            USER_DATA["hashed_password"]
         )
 
         db_test_connection.add(user_test_db)
@@ -77,10 +81,15 @@ def test_get_user(user_manager):
 
 def test_authenticate_user(user_manager):
     with SessionLocal() as db_test_connection:
+
+        hashed_password = user_manager.get_hash_password(
+            USER_DATA['hashed_password'])
+        USER_DATA['hashed_password'] = hashed_password
+
         user_test_db = User(**USER_DATA)
         user_test_db_password = USER_DATA["password"]
         user_test_db.hashed_password = user_manager.get_hash_password(
-            USER_DATA["password"]
+            USER_DATA["hashed_password"]
         )
 
         db_test_connection.add(user_test_db)

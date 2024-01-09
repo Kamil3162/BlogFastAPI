@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from BlogFastAPI.app.utils.utils import get_db, decode_jwt
 # from app.utils.utils import getdb, decode_jwt
 from BlogFastAPI.app.utils.utils import get_db, decode_jwt
-from BlogFastAPI.app.utils.responses import HTTP_EXCEPTION
+from BlogFastAPI.app.utils.exceptions import HTTP_EXCEPTION
 from passlib.context import CryptContext
 from passlib.hash import sha256_crypt
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
@@ -46,6 +46,9 @@ async def check_token_status(
 ):
     try:
         decoded_jwt = decode_jwt(token)
+
+        print(decoded_jwt)
+
         token_data = TokenStatus(is_valid=True)
         return token_data
     except JWTError:

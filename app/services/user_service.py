@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from BlogFastAPI.app.db.models.models import User, BlacklistedUser
 from BlogFastAPI.app.auth.user_manager.user_auth import USER_AUTH
+
 class UserService:
 
     @staticmethod

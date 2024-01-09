@@ -51,7 +51,6 @@ async def login_for_access_token(
 async def read_users_me(
         current_user: User = Depends(USER_AUTH.get_current_active_user)
 ):
-    # Assuming UserResponse is a Pydantic model that matches the structure of the User model
     return current_user
 
 
