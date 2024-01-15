@@ -18,7 +18,7 @@ from BlogFastAPI.app.utils.utils import get_db, revoke_token
 from datetime import datetime, timedelta
 from BlogFastAPI.app.db.models.models import User
 from ..user_manager.user_auth import USER_AUTH, oauth2_scheme, check_token_status
-
+from ..schemas.schemas import UserCreate
 auth_router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -45,6 +45,25 @@ async def login_for_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@auth_router.post('/register', response_model=UserResponse)
+async def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    # success - create a new account for our blog user
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed_password = USER_AUTH.get_hash_password(user.password)
+    db_user = User(email=user.email, first_name=user.first_name,
+                   last_name=user.last_name, hashed_password=hashed_password)
+
+    print(db_user.email)
+
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+
+    return db_user
 
 
 @auth_router.get("/users/me/", response_model=UserSchemeOfficial)

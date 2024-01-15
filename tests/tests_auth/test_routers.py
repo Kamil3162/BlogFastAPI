@@ -6,13 +6,9 @@ from BlogFastAPI.app.auth.user_manager.user_auth import (
     UserAuth,
     oauth2_scheme
 )
+from BlogFastAPI.tests.tests_auth.db_test import db_session
 from .config import client
 
-# i have to check does user is created
-# check does we can log in with this data or soemthing like this
-# check get hash password function
-# check duplication of emails in our db
-# sprawdzic checker z szukaniem usersow
 
 USER_DATA = {
     "email": "test@example.com",
@@ -31,7 +27,7 @@ def test_get_method():
     response = client.get("/register")
     assert response.status_code == 405
 
-def test_create_user_success():
+def test_create_user_success(db_session):
     user_payload = {
         "email": "test@example.com",
         "first_name": "John",
@@ -39,17 +35,15 @@ def test_create_user_success():
         "password": "password123"
     }
 
-    db_test_connection = SessionLocal()
-
-    db_user = db_test_connection.query(User).filter(
+    db_user = db_session.query(User).filter(
         User.email == user_payload["email"]
     ).first()
 
     assert db_user is None
-    db_test_connection.close()
+    db_session.close()
 
 
-def test_user_create():
+def test_user_create(db_session):
     user_payload = {
         "email": "test@example.com",
         "first_name": "John",
@@ -57,32 +51,31 @@ def test_user_create():
         "password": "password123"
     }
 
-    with SessionLocal() as db_test_connection:
-        user_db = db_test_connection.query(User).filter(
-            User.email == user_payload["email"]
-        )
+    user_db = db_session.query(User).filter(
+        User.email == user_payload["email"]
+    )
 
-        assert user_db is None
+    assert user_db is None
 
-        user_plain_password = user_payload["password"]
-        user = User(**user_payload)
+    user_plain_password = user_payload["password"]
+    user = User(**user_payload)
 
-        hashed_user_password = user_auth_manager.get_hash_password(
-            user_plain_password
-        )
+    hashed_user_password = user_auth_manager.get_hash_password(
+        user_plain_password
+    )
 
-        user.hashed_password = hashed_user_password
+    user.hashed_password = hashed_user_password
 
-        db_test_connection.add(User)
-        db_test_connection.commit()
-        db_test_connection.close()
+    db_session.add(User)
+    db_session.commit()
+    db_session.close()
 
-        created_user = db_test_connection.query(User).filter(
-            User.email == user_payload["email"]
-        ).first()
+    created_user = db_session.query(User).filter(
+        User.email == user_payload["email"]
+    ).first()
 
-        assert created_user is not None
-        assert created_user.email == user_payload["email"]
+    assert created_user is not None
+    assert created_user.email == user_payload["email"]
 
 
 

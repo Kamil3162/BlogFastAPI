@@ -11,7 +11,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from datetime import datetime
 from ..database import Base
-from .enums import BlacklistReason
+from .enums import BlacklistReason, UserRoles
 CONSTANT = 32
 
 class User(Base):
@@ -26,6 +26,7 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    role = Column(Enum(UserRoles), default=UserRoles.BLOGGER)
 
     posts = relationship("Post", back_populates="owner")
     comments = relationship("Comment", back_populates="commentator")

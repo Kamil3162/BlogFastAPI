@@ -6,23 +6,8 @@ from BlogFastAPI.app.db.models.models import User
 from BlogFastAPI.app.utils.utils import get_db
 from BlogFastAPI.app.services.user_service import UserService
 from typing import Annotated, List
+
 router = APIRouter()
-
-@router.post('/register', response_model=UserResponse)
-async def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    # success - create a new account for our blog user
-    db_user = db.query(User).filter(User.email == user.email).first()
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    hashed_password = USER_AUTH.get_hash_password(user.password)
-    db_user = User(email=user.email, first_name=user.first_name,
-                   last_name=user.last_name, hashed_password=hashed_password)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-
-    return db_user
 
 @router.get('/blacklisted-user/', response_model=BlacklistedUserSchema)
 async def blacklisted_users(db: Session = Depends(get_db)):

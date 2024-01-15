@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from BlogFastAPI.app.utils.utils import get_db, decode_jwt
 # from app.utils.utils import getdb, decode_jwt
 from BlogFastAPI.app.utils.utils import get_db, decode_jwt
-from BlogFastAPI.app.utils.exceptions import HTTP_EXCEPTION
+from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
 from passlib.context import CryptContext
 from passlib.hash import sha256_crypt
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
@@ -37,7 +37,7 @@ async def get_current_user(
 
     user = USER_AUTH.get_user(email=token_data.email, db=db)
     if user is None:
-        raise HTTP_EXCEPTION
+        raise CustomHTTPExceptions.unauthorized()
     return user
 
 async def check_token_status(
@@ -106,7 +106,6 @@ class UserAuth:
     async def get_current_active_user(
         self, current_user: Annotated[User, Depends(get_current_user)]
     ):
-        print("wykonywanie")
         print(current_user)
         if not current_user.is_active:
             raise HTTPException(status_code=400, detail="Inactive user")

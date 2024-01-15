@@ -4,3 +4,10 @@ class BlacklistReason(enum.Enum):
     ABUSE = "Abusive behavior"
     HACK_ATTEMPT = "Attempted security breach"
     OTHER = "Other"
+
+
+class UserRoles(enum.Enum):
+    ADMIN = "ADMIN"
+    MODERATOR = "MODERATOR"
+    BLOGGER = "BLOGGER"
+    ANONYMOUS_USER = "ANONYMOUS_USER"

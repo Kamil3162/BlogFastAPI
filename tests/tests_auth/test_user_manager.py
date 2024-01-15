@@ -2,6 +2,7 @@ from .config import client
 from BlogFastAPI.app.auth.user_manager import user_auth
 from BlogFastAPI.app.db.database import SessionLocal
 from BlogFastAPI.app.db.models.models import User
+from BlogFastAPI.tests.tests_auth.db_test import db_session
 from datetime import timedelta
 import pytest
 
@@ -57,50 +58,46 @@ def test_access_token_creation(user_manager):
     assert decoded_token["email"] == user_data["email"]
 
 
-def test_get_user(user_manager):
-    with SessionLocal() as db_test_connection:
+def test_get_user(user_manager, db_session):
+    hashed_password = user_manager.get_hash_password(USER_DATA['hashed_password'])
+    USER_DATA['hashed_password'] = hashed_password
 
-        hashed_password = user_manager.get_hash_password(USER_DATA['hashed_password'])
-        USER_DATA['hashed_password'] = hashed_password
+    user_test_db = User(**USER_DATA)
+    user_test_db.hashed_password = user_manager.get_hash_password(
+        USER_DATA["hashed_password"]
+    )
 
-        user_test_db = User(**USER_DATA)
-        user_test_db.hashed_password = user_manager.get_hash_password(
-            USER_DATA["hashed_password"]
-        )
+    db_session.add(user_test_db)
+    db_session.commit()
 
-        db_test_connection.add(user_test_db)
-        db_test_connection.commit()
+    db_found_user = user_manager.get_user(
+        user_test_db.email,
+        db_session
+    )
 
-        db_found_user = user_manager.get_user(
-            user_test_db.email,
-            db_test_connection
-        )
+    assert db_found_user is not None
+    assert db_found_user.email == USER_DATA["email"]
 
-        assert db_found_user is not None
-        assert db_found_user.email == USER_DATA["email"]
+def test_authenticate_user(user_manager, db_session):
+    hashed_password = user_manager.get_hash_password(
+        USER_DATA['hashed_password'])
+    USER_DATA['hashed_password'] = hashed_password
 
-def test_authenticate_user(user_manager):
-    with SessionLocal() as db_test_connection:
+    user_test_db = User(**USER_DATA)
+    user_test_db_password = USER_DATA["hashed_password"]
+    user_test_db.hashed_password = user_manager.get_hash_password(
+        USER_DATA["hashed_password"]
+    )
 
-        hashed_password = user_manager.get_hash_password(
-            USER_DATA['hashed_password'])
-        USER_DATA['hashed_password'] = hashed_password
+    db_session.add(user_test_db)
+    db_session.commit()
 
-        user_test_db = User(**USER_DATA)
-        user_test_db_password = USER_DATA["password"]
-        user_test_db.hashed_password = user_manager.get_hash_password(
-            USER_DATA["hashed_password"]
-        )
+    db_found_user = user_manager.authenticate_user(
+        db_session,
+        user_test_db.email,
+        user_test_db_password
+    )
 
-        db_test_connection.add(user_test_db)
-        db_test_connection.commit()
-
-        db_found_user = user_manager.authenticate_user(
-            db_test_connection,
-            user_test_db.email,
-            user_test_db_password
-        )
-
-        assert db_found_user is not None
-        assert db_found_user.email == USER_DATA["email"]
+    assert db_found_user is not None
+    assert db_found_user.email == USER_DATA["email"]
 

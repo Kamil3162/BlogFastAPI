@@ -2,11 +2,10 @@ from BlogFastAPI.app.auth.schemas.post_schemas import PostCreate, PostRead
 from fastapi import HTTPException, status
 from ..db.models.models import Post, User
 from ..utils.utils import check_post_existance
-from ..utils import exceptions
+from ..utils.exceptions import CustomHTTPExceptions
 from sqlalchemy.orm import Session
 
 class PostService:
-
     @staticmethod
     def check_post_existance(db: Session, title=None):
         return db.query(Post).filter(Post.title == title).first() is not None
@@ -21,10 +20,12 @@ class PostService:
             post_data = post
             if PostService.check_post_existance(db, post.title):
                 # You can handle this by raising an exception or returning a message
-                return exceptions.HTTP_POST_EXISTANCE_EXCEPTION
+                return CustomHTTPExceptions.bad_request()
 
             if PostService.check_user_existance(db, post_data.owner_id):
-                raise HTTPException(status_code=400, detail="A post with this title already exists")
+                return CustomHTTPExceptions.bad_request(
+                    detail="A post with this title already exists"
+                )
 
             new_post = Post(
                 title=post_data.title,
@@ -41,7 +42,7 @@ class PostService:
         except Exception as e:
             # For example, log the error and/or re-raise the exception
             db.rollback()
-            raise exceptions.HTTP_POST_SERVER_ERROR
+            raise CustomHTTPExceptions.internal_server_error()
 
     @staticmethod
     def update_post(post_id: int, post_data: PostCreate, db: Session) -> PostRead:
@@ -52,9 +53,9 @@ class PostService:
         :param db:
         :return:
         """
-        post_instance = db.query(Post).filter(Post.id == post_id).first()
+        post_instance = PostService.get_post(post_id, db)
         if not post_instance:
-            raise exceptions.HTTP_POST_EXCEPTION
+            raise CustomHTTPExceptions.not_found()
 
         for key, value in post_data.model_dump().items():
             setattr(post_instance, key, value)
@@ -66,9 +67,9 @@ class PostService:
 
     @staticmethod
     def delete_post(post_id: int, db: Session):
-        post_instance = db.query(Post).filter(Post.id == post_id).first()
+        post_instance = PostService.get_post(post_id, db)
         if not post_instance:
-            raise exceptions.HTTP_POST_EXCEPTION
+            raise CustomHTTPExceptions.not_found()
 
         db.delete(post_instance)
         db.commit()
@@ -76,5 +77,6 @@ class PostService:
 
     @staticmethod
     def get_post(post_id: int, db: Session):
+        print("get post pobieranie posta")
         post = db.query(Post).filter(Post.id == post_id).first()
         return post

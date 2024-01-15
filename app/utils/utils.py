@@ -2,7 +2,7 @@ import os
 from BlogFastAPI.app.db.database import SessionLocal
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
-from .exceptions import HTTP_EXCEPTION
+from .exceptions import CustomHTTPExceptions
 from ..db.models.models import RevokedToken, Post
 from dotenv import load_dotenv
 from pathlib import Path
@@ -24,7 +24,7 @@ def decode_jwt(token: str) -> dict:
         return jwt.decode(token, str(os.getenv("SECRET_KEY")),
                           algorithms=["HS256"])
     except JWTError:
-        raise HTTP_EXCEPTION
+        raise CustomHTTPExceptions.unauthorized()
 
 
 # Function to add a revoked token to the database

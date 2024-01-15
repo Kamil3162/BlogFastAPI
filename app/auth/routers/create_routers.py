@@ -12,17 +12,28 @@ from BlogFastAPI.app.utils.utils import get_db, revoke_token
 from ..schemas.post_schemas import PostCreate, PostRead, PostUpdate
 from BlogFastAPI.app.db.models.models import User
 from BlogFastAPI.app.services.post_service import PostService
-
+from BlogFastAPI.app.services.user_service import UserService
 from ..user_manager.user_auth import oauth2_scheme, USER_AUTH
 
 create_post_router = APIRouter()
+@create_post_router.get("/post/{post_id}/", response_model=PostRead)
+async def get_post(post_id: int, db: Session = Depends(get_db)):
+    print("to jest metoda get do pobierania posta")
+    post = PostService.get_post(post_id, db)
+    return PostRead.model_validate(post)
+
 @create_post_router.post("/post-create/")
 async def create_post(
     post: PostCreate,
     db: Session = Depends(get_db),
     # current_user: User = Depends(USER_AUTH.get_current_active_user)
 ):
+    print(post)
+    print(post.title)
+    print(post.owner_id)
     print("to jest post method do tworzenia posta ")
+    user = UserService.get_user_by_id(db, post.owner_id)
+    print(user)
     created_post = PostService.create_post(post, db)
     return created_post
 
@@ -36,15 +47,6 @@ async def update_post(
 ):
     updated_post = PostService.update_post(post_id, post, db)
     return updated_post
-
-@create_post_router.get("/post/{post_id}/")
-async def post_detail(
-    post_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(USER_AUTH.get_current_active_user)
-):
-    post = PostService.get_post(post_id, db)
-    return post
 
 @create_post_router.delete("/post-delete/{post_id}/")
 async def delete_post(

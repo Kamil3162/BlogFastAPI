@@ -20,3 +20,6 @@ class PostRead(BaseModel):
 class PostUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
+
+
+

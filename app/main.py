@@ -4,10 +4,12 @@ import json
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from pathlib import Path
+from ..app.core.config import env_path1, settings
 from .core.config import env_path1, settings
 from .auth.routers.routers import router
 from .auth.routers.authentication_routers import auth_router
 from .auth.routers.create_routers import create_post_router
+from .auth.routers.comments_routers import comment_routers
 from .db.database import (
     SQLALCHEMY_DATABASE_URL,
     Base,
@@ -17,12 +19,14 @@ from .db.database import (
 from .db.models import models
 from .utils.utils import get_db
 
+
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 app.include_router(router)
 app.include_router(auth_router)
 app.include_router(create_post_router)
+app.include_router(comment_routers)
 
 env_path = Path(__file__).parent / 'config.env'
 
@@ -58,4 +62,4 @@ async def users():
 
 #
 if __name__ == "__main__":
-    uvicorn.run(app, port=10000)
+    pass
