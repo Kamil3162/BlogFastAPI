@@ -67,7 +67,7 @@ class PostService:
 
     @staticmethod
     def delete_post(post_id: int, db: Session):
-        post_instance = PostService.get_post(post_id, db)
+        post_instance = PostService.get_post(db, post_id)
         if not post_instance:
             raise CustomHTTPExceptions.not_found()
 
@@ -76,7 +76,14 @@ class PostService:
         return {'status': 'deleted'}
 
     @staticmethod
-    def get_post(post_id: int, db: Session):
+    def get_post(db: Session, post_id: int):
         print("get post pobieranie posta")
+        print(post_id)
         post = db.query(Post).filter(Post.id == post_id).first()
+        print(post)
         return post
+
+    @staticmethod
+    def get_posts(db: Session):
+        posts = db.query(Post).all()
+        return posts

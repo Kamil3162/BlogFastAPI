@@ -8,7 +8,6 @@ certifi==2023.11.17
 cffi==1.16.0
 click==8.1.7
 colorama==0.4.6
-core==0.0.0
 coverage==7.3.3
 cryptography==41.0.7
 db==0.0.0

@@ -8,7 +8,11 @@ from fastapi import (
     Depends
 )
 from fastapi.routing import APIRouter
-from ..schemas.schemas import UserSchemeOfficial, UserHashPassword, UserResponse
+from ..schemas.schemas import(
+    UserSchemeOfficial,
+    UserHashPassword,
+    UserRoleScheme,
+    UserResponse)
 from ..schemas.token_schemas import TokenData, Token, TokenStatus
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -19,6 +23,8 @@ from datetime import datetime, timedelta
 from BlogFastAPI.app.db.models.models import User
 from ..user_manager.user_auth import USER_AUTH, oauth2_scheme, check_token_status
 from ..schemas.schemas import UserCreate
+from BlogFastAPI.app.services.user_service import UserService
+
 auth_router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -66,13 +72,6 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 
-@auth_router.get("/users/me/", response_model=UserSchemeOfficial)
-async def read_users_me(
-        current_user: User = Depends(USER_AUTH.get_current_active_user)
-):
-    return current_user
-
-
 @auth_router.get("/valid/token", response_model=TokenStatus)
 async def token_valid(token_status = Depends(check_token_status)):
     return token_status
@@ -92,3 +91,34 @@ async def logout(token: Annotated[str, Depends(oauth2_scheme)],
                  db: Session = Depends(get_db)):
     blocked_token = revoke_token(db, token)
     return {'blocked_token': blocked_token, 'logout': 'success'}
+
+
+
+# urls resposible for generate data for users
+
+
+@auth_router.get("/users/me/", response_model=UserSchemeOfficial)
+async def read_users_me(
+        current_user: User = Depends(USER_AUTH.get_current_active_user)
+):
+    return current_user
+
+@auth_router.get("/user/{user_id}/", response_model=UserSchemeOfficial)
+async def get_user(
+        user_id: int,
+        current_user: User = Depends(USER_AUTH.get_current_active_user),
+        db: Session = Depends(get_db)
+):
+    user = UserService.get_user_by_id(db, user_id)
+    return user
+
+@auth_router.get("/user-role/{user_id}/", response_model=UserRoleScheme)
+async def get_user(
+        user_id: int,
+        current_user: User = Depends(USER_AUTH.get_admin_user),
+        db: Session = Depends(get_db)
+):
+    print("funkcja get user")
+    user = UserService.get_user_by_id(db, user_id)
+    return user
+

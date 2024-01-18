@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from BlogFastAPI.app.db.models.enums import UserRoles
 from typing import Optional, TypeVar
 from datetime import datetime
 T = TypeVar('T')
@@ -9,6 +10,9 @@ class UserCreate(BaseModel):
     first_name: str
     last_name: str
     password: str
+
+
+
 
 
 class UserResponse(BaseModel):
@@ -28,6 +32,8 @@ class UserSchemeOfficial(BaseModel):
     last_name: str
     is_active: bool
 
+class UserRoleScheme(UserSchemeOfficial):
+    role: UserRoles
 
 class UserHashPassword(UserSchemeOfficial):
     hashed_password: str

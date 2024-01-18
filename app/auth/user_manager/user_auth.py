@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from BlogFastAPI.app.utils.utils import get_db, decode_jwt
 # from app.utils.utils import getdb, decode_jwt
 from BlogFastAPI.app.utils.utils import get_db, decode_jwt
+from BlogFastAPI.app.db.models.enums import UserRoles
 from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
 from passlib.context import CryptContext
 from passlib.hash import sha256_crypt
@@ -75,6 +76,12 @@ class UserAuth:
             return False
         return user
 
+    def check_user_admin_permission(self, email: str, db):
+        user = db.query(User).filter(User.email == email).first()
+        if user.role is UserRoles.ADMIN.value:
+            return False
+        return user
+
     def authenticate_user(self, db, email: str, password: str):
         user = self.get_user(email=email, db=db)
         if not user:
@@ -111,6 +118,12 @@ class UserAuth:
             raise HTTPException(status_code=400, detail="Inactive user")
         return current_user
 
+    async def get_admin_user(
+        self, current_user: Annotated[User, Depends(get_current_user)]
+    ):
+        if current_user.role != UserRoles.ADMIN.value:
+            raise HTTPException(status_code=401, detail="You havent permission to change and check this data")
+        return current_user
 
 USER_AUTH = UserAuth(oauth2_scheme=oauth2_scheme)
 

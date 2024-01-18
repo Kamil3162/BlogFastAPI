@@ -4,7 +4,6 @@ import json
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from pathlib import Path
-from ..app.core.config import env_path1, settings
 from .core.config import env_path1, settings
 from .auth.routers.routers import router
 from .auth.routers.authentication_routers import auth_router

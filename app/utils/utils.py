@@ -1,5 +1,5 @@
 import os
-from BlogFastAPI.app.db.database import SessionLocal
+from ..db.database import SessionLocal
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 from .exceptions import CustomHTTPExceptions
