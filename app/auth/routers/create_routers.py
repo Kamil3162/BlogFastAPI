@@ -35,14 +35,9 @@ async def get_posts(
 async def create_post(
     post: PostCreate,
     db: Session = Depends(get_db),
-    # current_user: User = Depends(USER_AUTH.get_current_active_user)
+    current_user: User = Depends(USER_AUTH.get_current_active_user)
 ):
-    print(post)
-    print(post.title)
-    print(post.owner_id)
-    print("to jest post method do tworzenia posta ")
     user = UserService.get_user_by_id(db, post.owner_id)
-    print(user)
     created_post = PostService.create_post(post, db)
     return created_post
 

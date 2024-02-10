@@ -19,9 +19,9 @@ def test_create_user(db_session):
     assert user.first_name == user_payload["email"]
     assert user.last_name == user_payload["email"]
 
-def test_blacklisted_users(db_session):pass
+def test_blacklisted_users(db_session): pass
 
-def test_user_existancce(db_session):pass
+def test_user_existancce(db_session): pass
 
 def test_get_user_id_success(db_session):
     # test function to get user using id
@@ -30,6 +30,11 @@ def test_get_user_id_success(db_session):
     user = UserService.get_user_by_id(db_session, valid_user_id)
     assert user is not None
     assert user.id == valid_user_id
+
+def test_get_user_id_failed(db_session):
+    user_id = 321321
+    user = UserService.get_user_by_id(db_session, user_id)
+    assert user is None
 
 def test_get_user_by_id_not_found(db_session):
     # Use an ID that does not exist in your test database

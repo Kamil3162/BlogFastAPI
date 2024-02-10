@@ -33,7 +33,6 @@ class User(Base):
     blacklisted_users = relationship("BlacklistedUser",
                                      back_populates="user",
                                      uselist=False)
-
     def __str__(self):
         return f"User(id={self.id}, email='{self.email}', first_name='{self.first_name}', " \
                f"last_name='{self.last_name}', is_active={self.is_active}, " \
@@ -53,6 +52,18 @@ class Post(Base):
 
     owner = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="post")
+    sections = relationship("Section", back_populates="post")
+
+class Section(Base):
+    __tablename__ = 'sections'
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    content = Column(String)
+    photo_url = Column(String)
+
+    post_id = Column(Integer, ForeignKey('posts.id'))
+    post = relationship("Post", back_populates="sections")
+
 
 class Comment(Base):
     __tablename__ = 'comments'

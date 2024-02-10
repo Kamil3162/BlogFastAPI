@@ -17,11 +17,13 @@ from .db.database import (
 )
 from .db.models import models
 from .utils.utils import get_db
-
+from .middleware.docs_middleware import DocsBlockMiddleware
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(docs_url='/docs', redoc_url=None)
+app.add_middleware(DocsBlockMiddleware)
+
 app.include_router(router)
 app.include_router(auth_router)
 app.include_router(create_post_router)
@@ -33,7 +35,6 @@ load_dotenv(dotenv_path=env_path)
 
 @app.get('/')
 async def home():
-    print(sys.path)
     return {'key': 'value'}
 
 
@@ -55,9 +56,7 @@ async def read_user_item(item_id: str, needy: str):
     item = {"item_id": item_id, "needy": needy}
     return json.dump(item)
 
-@app.get("/users")
-async def users():
-    pass
+
 
 #
 if __name__ == "__main__":

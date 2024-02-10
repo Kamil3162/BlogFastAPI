@@ -11,6 +11,14 @@ class CustomHTTPExceptions:
         )
 
     @staticmethod
+    def forbidden(detail: str = "Forbidden access"):
+        return HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=detail,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    @staticmethod
     def not_found(detail: str = "Not found"):
         return HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

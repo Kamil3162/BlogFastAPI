@@ -22,9 +22,9 @@ from BlogFastAPI.app.utils.utils import get_db, revoke_token
 from datetime import datetime, timedelta
 from BlogFastAPI.app.db.models.models import User
 from ..user_manager.user_auth import USER_AUTH, oauth2_scheme, check_token_status
-from ..schemas.schemas import UserCreate
+from ..schemas.schemas import UserCreate, UserUpdate
 from BlogFastAPI.app.services.user_service import UserService
-
+from BlogFastAPI.app.middleware.role_middleware import UserMiddleware, UserRoles
 auth_router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -63,8 +63,6 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = User(email=user.email, first_name=user.first_name,
                    last_name=user.last_name, hashed_password=hashed_password)
 
-    print(db_user.email)
-
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -96,12 +94,13 @@ async def logout(token: Annotated[str, Depends(oauth2_scheme)],
 
 # urls resposible for generate data for users
 
-
 @auth_router.get("/users/me/", response_model=UserSchemeOfficial)
 async def read_users_me(
         current_user: User = Depends(USER_AUTH.get_current_active_user)
 ):
     return current_user
+
+
 
 @auth_router.get("/user/{user_id}/", response_model=UserSchemeOfficial)
 async def get_user(
@@ -112,6 +111,18 @@ async def get_user(
     user = UserService.get_user_by_id(db, user_id)
     return user
 
+@auth_router.put("/user-update/{user_id}/")
+async def update_user(
+        user_id: int,
+        user_data: UserUpdate,
+        db: Session = Depends(get_db),
+    ):
+    print("to jest endpoint dla update user")
+    user = UserService.get_user_by_id(db, user_id)
+    hashed_password = USER_AUTH.get_hash_password(password=user_data.password)
+    user.password = hashed_password
+    return user
+
 @auth_router.get("/user-role/{user_id}/", response_model=UserRoleScheme)
 async def get_user(
         user_id: int,
@@ -119,6 +130,15 @@ async def get_user(
         db: Session = Depends(get_db)
 ):
     print("funkcja get user")
+
     user = UserService.get_user_by_id(db, user_id)
     return user
 
+
+@auth_router.get("/users")
+async def users(user_role: Annotated[User,
+                Depends(UserMiddleware.check_permission(role=UserRoles.ADMIN))],
+                db: Session = Depends(get_db)
+                ):
+    users = UserService.get_all_users(db)
+    return users

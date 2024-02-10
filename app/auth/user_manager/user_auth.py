@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from BlogFastAPI.app.utils.utils import get_db, decode_jwt
-# from app.utils.utils import getdb, decode_jwt
 from BlogFastAPI.app.utils.utils import get_db, decode_jwt
 from BlogFastAPI.app.db.models.enums import UserRoles
 from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
@@ -29,9 +28,17 @@ async def get_current_user(
         token: str = Depends(oauth2_scheme),
         db: Session = Depends(get_db)  # Injecting the database session here
 ):
+    """
+        Function return user instance based on valid token and decoded email
+        from jwt-token
+    :param token:
+    :param db:
+    :return:
+    """
     try:
         payload = decode_jwt(token)
-        email = payload["sub"]
+        print(payload)
+        email = payload["sub"]  # this line return our email encoded in jwt
         token_data = TokenData(email=email)
     except JWTError:
         raise JWTError("Problem with JWT TOKEN")
@@ -70,7 +77,6 @@ class UserAuth:
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_user(self, email: str, db):
-        print("tto jest funkcja get user")
         user = db.query(User).filter(User.email == email).first()
         if user is None:
             return False

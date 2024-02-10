@@ -3,6 +3,8 @@ from BlogFastAPI.app.db.models.models import User, BlacklistedUser
 from BlogFastAPI.app.auth.user_manager.user_auth import USER_AUTH
 from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
 from BlogFastAPI.app.db.models.enums import UserRoles
+from BlogFastAPI.app.auth.schemas.schemas import UserSchemeOfficial
+from typing import List
 class UserService:
 
     @staticmethod
@@ -64,3 +66,8 @@ class UserService:
     def has_valid_role_for_post_creation(user):
         valid_roles = [role.value for role in UserRoles]
         return user.role in valid_roles
+
+    @staticmethod
+    def get_all_users(db: Session) -> List[UserSchemeOfficial]:
+        db_users = db.query(User).all()
+        return [UserSchemeOfficial.model_validate(user) for user in db_users]
