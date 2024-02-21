@@ -71,3 +71,10 @@ class UserService:
     def get_all_users(db: Session) -> List[UserSchemeOfficial]:
         db_users = db.query(User).all()
         return [UserSchemeOfficial.model_validate(user) for user in db_users]
+
+    @staticmethod
+    def get_user_by_email(email_user: str, db: Session):
+        db_user = db.query(User).filter(User.email == email_user).first()
+        return db_user
+
+

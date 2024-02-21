@@ -49,6 +49,7 @@ class Post(Base):
     photo_url = Column(String)
 
     owner_id = Column(Integer, ForeignKey('users.id'))
+    views = Column(Integer, default=0)
 
     owner = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="post")

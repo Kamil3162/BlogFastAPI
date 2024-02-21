@@ -22,7 +22,7 @@ from .middleware.docs_middleware import DocsBlockMiddleware
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(docs_url='/docs', redoc_url=None)
-app.add_middleware(DocsBlockMiddleware)
+# app.add_middleware(DocsBlockMiddleware)
 
 app.include_router(router)
 app.include_router(auth_router)

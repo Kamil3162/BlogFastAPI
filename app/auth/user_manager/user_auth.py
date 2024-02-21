@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from BlogFastAPI.app.utils.utils import get_db, decode_jwt
-from BlogFastAPI.app.utils.utils import get_db, decode_jwt
 from BlogFastAPI.app.db.models.enums import UserRoles
 from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
 from passlib.context import CryptContext
@@ -99,7 +98,6 @@ class UserAuth:
     def create_access_token(self, data: dict,
                             expires_delta: Optional[datetime.timedelta] = None):
         """
-
         :param data:
         :param expires_delta:
         :return:
@@ -112,6 +110,20 @@ class UserAuth:
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_jwt
+
+    def create_refresh_token(self, data: dict,
+                             expires_delta: Optional[datetime.datetime] = None):
+        to_encode = data.copy()
+        if not expires_delta:
+            expires_delta = datetime.timedelta(days=2)
+        expire = datetime.datetime.utcnow() + expires_delta
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+        return encoded_jwt
+
+    def create_reset_password_token(self, email):
+        data = {"sub": email, "exp":datetime.datetime.utcnow() + datetime.timedelta(minutes=20)}
+        return jwt.encode(data, self.SECRET_KEY, self.ALGORITHM)
 
     def decode_access_token(self, token):
         return jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])

@@ -28,7 +28,6 @@ async def get_posts(
         db: Session = Depends(get_db)
     ):
     all_posts = PostService.get_posts(db)
-    print(all_posts)
     return all_posts
 
 @create_post_router.post("/post-create/")
