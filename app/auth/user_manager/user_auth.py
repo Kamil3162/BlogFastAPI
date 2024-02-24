@@ -103,6 +103,7 @@ class UserAuth:
         :return:
         """
         to_encode = data.copy()
+        print(to_encode)
         if expires_delta:
             expire = datetime.datetime.utcnow() + expires_delta
         else:

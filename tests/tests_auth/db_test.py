@@ -4,7 +4,9 @@ from BlogFastAPI.app.core.config import Settings
 from BlogFastAPI.app.db.database import Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 DB_URL = f"postgresql://postgres:admin@localhost:5432/BlogTestDB"
+
 SQLALCHEMY_DATABASE_TEST_URL = DB_URL
 
 

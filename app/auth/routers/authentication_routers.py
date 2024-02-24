@@ -1,3 +1,4 @@
+import json
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi import (
     HTTPException,
@@ -6,7 +7,8 @@ from fastapi import (
     APIRouter,
     status,
     Depends,
-    BackgroundTasks
+    BackgroundTasks,
+    Cookie
 )
 from fastapi.routing import APIRouter
 from ..schemas.schemas import(
@@ -28,16 +30,20 @@ from BlogFastAPI.app.services.user_service import UserService
 from BlogFastAPI.app.middleware.role_middleware import UserMiddleware, UserRoles
 from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
 from BlogFastAPI.app.services.email_service import EmailService
+from urllib.parse import quote
+
 auth_router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = oauth2_scheme
 
-@auth_router.post("/token", response_model=Token)
+@auth_router.post("/token")
 async def login_for_access_token(
+    response: Response,  # Add the response parameter to set cookies
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db)
 ):
+    print("to jest request na token")
     user = USER_AUTH.authenticate_user(
         db,
         form_data.username,
@@ -60,14 +66,46 @@ async def login_for_access_token(
         data={"sub": user.email}, expires_delta=refresh_token_expires
     )
 
+    # Set access token in httpOnly cookie
+    response.set_cookie(key="access_token",
+                        value=access_token,
+                        httponly=True,
+                        max_age=int(access_token_expires.total_seconds()),
+                        path='/')
+
+    # Optionally set refresh token in httpOnly cookie if you're using refresh tokens
+    response.set_cookie(key="refresh_token",
+                        value=refresh_token,
+                        httponly=True,
+                        max_age=int(refresh_token_expires.total_seconds()),
+                        path='/')
+
+    user_data = {
+        "id": user.id,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "is_active": user.is_active
+    }
+
+    user_data_json = quote(json.dumps(user_data))
+
+    response.set_cookie(key="user_data",
+                        value=user_data_json)
+
+    # Return a JSON response. FastAPI will handle the conversion to JSON.
+    # No need to call response.json() directly, just return the dict.
+
+    print("test")
+
     return {
         "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
     }
 
 @auth_router.post('/register', response_model=UserResponse)
 async def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    print(user)
     db_user = UserService.create_user(db, user)
     if db_user is None:
         raise HTTPException(
@@ -106,10 +144,37 @@ async def password_reset(
         "message": "If a user with that email exists, a password reset link has been sent."}
 
 @auth_router.get('/logout')
-async def logout(token: Annotated[str, Depends(oauth2_scheme)],
+async def logout(response: Response,
+                 access_token: str = Cookie(None),
                  db: Session = Depends(get_db)):
-    blocked_token = revoke_token(db, token)
-    return {'blocked_token': blocked_token, 'logout': 'success'}
+
+    print("sensed request to logout")
+
+    # code responsible for delete cookies from browser
+    response.delete_cookie('access_token')
+    response.delete_cookie('refresh_token')
+
+    return {'logout': 'success'}
+
+
+@auth_router.get("/validate")
+async def validate_token(access_token: str = Cookie(None)):
+    print(access_token)
+    if access_token is None:
+        return {"authenticated": False}
+
+    try:
+        # Assuming USER_AUTH.decode_access_token() is a method you've defined
+        # to decode and validate your JWT token.
+        decoded_token = USER_AUTH.decode_access_token(access_token)
+        # You might want to check if the token is expired or invalid here
+        # and raise an HTTPException if there are any issues.
+
+        # If everything is fine, return the authenticated user's information.
+        return {"authenticated": True,
+                "user": "User information based on decoded token"}
+    except Exception as e:  # You might want to catch more specific exceptions
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 @auth_router.get('/test')
