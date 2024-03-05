@@ -12,3 +12,8 @@ class TokenData(BaseModel):
 
 class TokenStatus(BaseModel):
     is_valid: bool
+
+
+class ResetTokenSchemas(BaseModel):
+    password: str
+    confim_password: str

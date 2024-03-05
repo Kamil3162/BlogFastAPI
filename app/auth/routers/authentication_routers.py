@@ -16,7 +16,8 @@ from ..schemas.schemas import(
     UserHashPassword,
     UserRoleScheme,
     UserResponse)
-from ..schemas.token_schemas import TokenData, Token, TokenStatus
+from ..schemas.token_schemas import TokenData, Token, TokenStatus, \
+    ResetTokenSchemas
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -142,6 +143,21 @@ async def password_reset(
 
     return {
         "message": "If a user with that email exists, a password reset link has been sent."}
+
+@auth_router.put("/password/reset/{token}")
+async def set_new_password(token: str, password_data: ResetTokenSchemas, db: Session = Depends(get_db)):
+    try:
+        if password_data.password != password_data.confim_password:
+            raise HTTPException(status_code=400,
+                                detail="Passwords do not match")
+        decoded_token = USER_AUTH.decode_reset_password_token(token)
+
+        username = decoded_token.get("sub")
+
+        user = UserService.set_new_password(username, db, password_data)
+        return {"message": "proper change password", "code": "200"}
+    except HTTPException:
+        raise HTTPException(status_code=404, detail="Problem with form")
 
 @auth_router.get('/logout')
 async def logout(response: Response,

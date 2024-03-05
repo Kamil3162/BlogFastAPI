@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+
+from BlogFastAPI.app.auth.schemas.token_schemas import ResetTokenSchemas
 from BlogFastAPI.app.db.models.models import User, BlacklistedUser
 from BlogFastAPI.app.auth.user_manager.user_auth import USER_AUTH
 from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
@@ -77,4 +79,11 @@ class UserService:
         db_user = db.query(User).filter(User.email == email_user).first()
         return db_user
 
+    @staticmethod
+    def set_new_password(email, db, password_data: ResetTokenSchemas):
+        db_user = UserService.get_user_by_email(email, db)
+        hashed_password = USER_AUTH.get_hash_password(password_data.password)
 
+        db_user.password = hashed_password
+
+        db.commit()

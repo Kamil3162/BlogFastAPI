@@ -9,10 +9,10 @@ from passlib.context import CryptContext
 from passlib.hash import sha256_crypt
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi import FastAPI, HTTPException, status
-from ..schemas.token_schemas import TokenData, TokenStatus
+from ..schemas.token_schemas import TokenData, TokenStatus, ResetTokenSchemas
 from fastapi import Depends
 from typing import Optional, Annotated
-from jose import jwt, JWTError
+from jose import jwt, JWTError, exceptions
 from sqlalchemy.orm import Session
 import datetime
 
@@ -126,8 +126,18 @@ class UserAuth:
         data = {"sub": email, "exp":datetime.datetime.utcnow() + datetime.timedelta(minutes=20)}
         return jwt.encode(data, self.SECRET_KEY, self.ALGORITHM)
 
+    def decode_reset_password_token(self, token):
+        try:
+            token_data = jwt.decode(token, self.SECRET_KEY, self.ALGORITHM)
+            return token_data
+        except exceptions.ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="Token has expired")
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid token")
+
     def decode_access_token(self, token):
         return jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+
 
     async def get_current_active_user(
         self, current_user: Annotated[User, Depends(get_current_user)]
