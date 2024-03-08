@@ -26,15 +26,15 @@ async def get_post(post_id: int, db: Session = Depends(get_db)):
 async def get_posts(
         current_user: User = Depends(USER_AUTH.get_current_active_user),
         db: Session = Depends(get_db)
-    ):
+):
     all_posts = PostService.get_posts(db)
     return all_posts
 
 @create_post_router.post("/post-create/")
 async def create_post(
-    post: PostCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(USER_AUTH.get_current_active_user)
+        post: PostCreate,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(USER_AUTH.get_current_active_user)
 ):
     user = UserService.get_user_by_id(db, post.owner_id)
     created_post = PostService.create_post(post, db)
@@ -42,10 +42,10 @@ async def create_post(
 
 @create_post_router.put("/post-update/{post_id}/")
 async def update_post(
-    post_id: int,
-    post: PostUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(USER_AUTH.get_current_active_user)
+        post_id: int,
+        post: PostUpdate,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(USER_AUTH.get_current_active_user)
 
 ):
     updated_post = PostService.update_post(post_id, post, db)
@@ -53,9 +53,9 @@ async def update_post(
 
 @create_post_router.delete("/post-delete/{post_id}/")
 async def delete_post(
-    post_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(USER_AUTH.get_current_active_user)
+        post_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(USER_AUTH.get_current_active_user)
 ):
     delete_status = PostService.delete_post(post_id, db)
     return delete_status

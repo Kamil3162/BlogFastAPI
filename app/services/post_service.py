@@ -2,17 +2,26 @@ from BlogFastAPI.app.auth.schemas.post_schemas import PostCreate, PostRead
 from fastapi import HTTPException, status
 from ..db.models.models import Post, User
 from ..utils.utils import check_post_existance
-from ..utils.exceptions import CustomHTTPExceptions
+from ..utils.exceptions_functions import CustomHTTPExceptions
+from ..utils.exceptions import NotFoundError
 from sqlalchemy.orm import Session
+from sqlalchemy import exc
+
 
 class PostService:
     @staticmethod
     def check_post_existance(db: Session, title=None):
-        return db.query(Post).filter(Post.title == title).first() is not None
+        try:
+            return db.query(Post).filter(Post.title == title).first() is not None
+        except exc.SQLAlchemyError:
+            raise NotFoundError("Following post doesnt exists")
 
     @staticmethod
     def check_user_existance(db: Session, user_id):
-        return db.query(User).filter(User.id == user_id).first() is not None
+        try:
+            return db.query(User).filter(User.id == user_id).first() is not None
+        except exc.SQLAlchemyError:
+            raise NotFoundError("Following user doesnt exists")
 
     @staticmethod
     def create_post(post: PostCreate, db: Session):
@@ -67,23 +76,30 @@ class PostService:
 
     @staticmethod
     def delete_post(post_id: int, db: Session):
-        post_instance = PostService.get_post(db, post_id)
-        if not post_instance:
-            raise CustomHTTPExceptions.not_found()
+        try:
+            post_instance = PostService.get_post(db, post_id)
+            if not post_instance:
+                raise CustomHTTPExceptions.not_found()
 
-        db.delete(post_instance)
-        db.commit()
-        return {'status': 'deleted'}
+            db.delete(post_instance)
+            db.commit()
+            return {'status': 'deleted'}
+        except exc.SQLAlchemyError as e:
+            CustomHTTPExceptions.handle_db_exeception(e)
 
     @staticmethod
     def get_post(db: Session, post_id: int):
-        print("get post pobieranie posta")
-        print(post_id)
-        post = db.query(Post).filter(Post.id == post_id).first()
-        print(post)
-        return post
+        try:
+            post = db.query(Post).filter(Post.id == post_id).first()
+            return post
+        except exc.SQLAlchemyError as e:
+            CustomHTTPExceptions.handle_db_exeception(e)
+
 
     @staticmethod
     def get_posts(db: Session):
-        posts = db.query(Post).all()
-        return posts
+        try:
+            posts = db.query(Post).all()
+            return posts
+        except exc.SQLAlchemyError as e:
+            CustomHTTPExceptions.handle_db_exeception(e)

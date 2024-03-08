@@ -1,6 +1,6 @@
 from BlogFastAPI.app.auth.user_manager.user_auth import get_current_user
 from BlogFastAPI.app.db.models.enums import UserRoles
-from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
+from BlogFastAPI.app.utils.exceptions_functions import CustomHTTPExceptions
 from fastapi import Depends
 class UserMiddleware:
 
@@ -12,5 +12,3 @@ class UserMiddleware:
             return user
         return check_user_permission
 
-    @staticmethod
-    def dsadsa(): ...

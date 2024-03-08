@@ -1,6 +1,6 @@
 import pytest
 from BlogFastAPI.app.services.user_service import UserService
-from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
+from BlogFastAPI.app.utils.exceptions_functions import CustomHTTPExceptions
 from BlogFastAPI.app.auth.user_manager.user_auth import UserAuth
 from ..tests_auth.db_test import db_session
 def test_create_user(db_session):

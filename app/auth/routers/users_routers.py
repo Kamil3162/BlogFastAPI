@@ -38,7 +38,6 @@ async def update_user(
         user_data: UserUpdate,
         db: Session = Depends(get_db),
     ):
-    print("to jest endpoint dla update user")
     user = UserService.get_user_by_id(db, user_id)
     hashed_password = USER_AUTH.get_hash_password(password=user_data.password)
     user.password = hashed_password
@@ -50,8 +49,6 @@ async def get_user(
         current_user: User = Depends(USER_AUTH.get_admin_user),
         db: Session = Depends(get_db)
 ):
-    print("funkcja get user")
-
     user = UserService.get_user_by_id(db, user_id)
     return user
 

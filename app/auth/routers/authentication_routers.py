@@ -29,7 +29,7 @@ from ..user_manager.user_auth import USER_AUTH, oauth2_scheme, check_token_statu
 from ..schemas.schemas import UserCreate, UserUpdate
 from BlogFastAPI.app.services.user_service import UserService
 from BlogFastAPI.app.middleware.role_middleware import UserMiddleware, UserRoles
-from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
+from BlogFastAPI.app.utils.exceptions_functions import CustomHTTPExceptions
 from BlogFastAPI.app.services.email_service import EmailService
 from urllib.parse import quote
 

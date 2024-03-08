@@ -4,7 +4,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from BlogFastAPI.app.utils.utils import get_db, decode_jwt
 from BlogFastAPI.app.db.models.enums import UserRoles
-from BlogFastAPI.app.utils.exceptions import CustomHTTPExceptions
+from BlogFastAPI.app.utils.exceptions_functions import CustomHTTPExceptions
 from passlib.context import CryptContext
 from passlib.hash import sha256_crypt
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
@@ -137,7 +137,6 @@ class UserAuth:
 
     def decode_access_token(self, token):
         return jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
-
 
     async def get_current_active_user(
         self, current_user: Annotated[User, Depends(get_current_user)]
