@@ -1,4 +1,7 @@
 import json
+from typing import Annotated, Union
+from datetime import datetime, timedelta
+from urllib.parse import quote
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi import (
     HTTPException,
@@ -11,6 +14,10 @@ from fastapi import (
     Cookie
 )
 from fastapi.routing import APIRouter
+
+from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+from jose import JWTError, jwt
 from ..schemas.schemas import(
     UserSchemeOfficial,
     UserHashPassword,
@@ -18,12 +25,7 @@ from ..schemas.schemas import(
     UserResponse)
 from ..schemas.token_schemas import TokenData, Token, TokenStatus, \
     ResetTokenSchemas
-from sqlalchemy.orm import Session
-from passlib.context import CryptContext
-from jose import JWTError, jwt
-from typing import Annotated, Union
 from BlogFastAPI.app.utils.utils import get_db, revoke_token
-from datetime import datetime, timedelta
 from BlogFastAPI.app.db.models.models import User
 from ..user_manager.user_auth import USER_AUTH, oauth2_scheme, check_token_status
 from ..schemas.schemas import UserCreate, UserUpdate
@@ -31,7 +33,6 @@ from BlogFastAPI.app.services.user_service import UserService
 from BlogFastAPI.app.middleware.role_middleware import UserMiddleware, UserRoles
 from BlogFastAPI.app.utils.exceptions_functions import CustomHTTPExceptions
 from BlogFastAPI.app.services.email_service import EmailService
-from urllib.parse import quote
 
 auth_router = APIRouter()
 
