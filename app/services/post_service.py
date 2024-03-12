@@ -95,7 +95,6 @@ class PostService:
         except exc.SQLAlchemyError as e:
             CustomHTTPExceptions.handle_db_exeception(e)
 
-
     @staticmethod
     def get_posts(db: Session):
         try:

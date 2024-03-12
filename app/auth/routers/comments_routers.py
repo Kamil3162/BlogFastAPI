@@ -17,10 +17,6 @@ async def get_comments(
         db: Session = Depends(get_db)):
     print("to jest endpoint comments")
 
-@comment_routers.get("/comments1")
-async def get_comments():
-    print("to jest endpoint comments")
-
 
 @comment_routers.post("/comment-create/{post_id}/")
 async def comment_create(
@@ -29,3 +25,8 @@ async def comment_create(
         current_user: User = Depends(USER_AUTH.get_current_active_user),
         db: Session = Depends(get_db)):
     print(post_id)
+
+
+@comment_routers.put("/comment-update")
+async def comment_update():
+    pass

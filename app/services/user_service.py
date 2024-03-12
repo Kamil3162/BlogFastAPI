@@ -47,11 +47,12 @@ class UserService:
 
     @staticmethod
     def get_user_by_id(db: Session, user_id):
-        # return exception not only none , its not good approach
-        user = db.query(User).filter(User.id == user_id).first()
-        if user is None:
-            raise CustomHTTPExceptions.not_found(f"User with ID:{user_id} not found")
-        return user
+        try:
+            user = db.query(User).filter(User.id == user_id).first()
+        except Exception as e:
+            CustomHTTPExceptions.handle_db_exeception(exception=e)
+        else:
+            return user
 
     @staticmethod
     def check_post_create_permission(db: Session, user_id):

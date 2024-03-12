@@ -74,7 +74,7 @@ class Comment(Base):
 
     commentator_id = Column(Integer, ForeignKey('users.id'))
     post_id = Column(Integer, ForeignKey("posts.id"))
-
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
     commentator = relationship("User", back_populates="comments")
     post = relationship("Post", back_populates="comments")
 

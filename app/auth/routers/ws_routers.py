@@ -46,5 +46,3 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
                        "message": "Offline"}
             await manager.broadcast_message(json.dumps(message))
             await manager.disconnect(user_id)
-
-
