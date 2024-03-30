@@ -18,7 +18,7 @@ class CommentService:
             if PostService.check_post_existance(db, post_id):
                 return CustomHTTPExceptions.bad_request()
 
-            comment = CommentScheme(
+            comment = Comment(
                 post_id=post_id,
                 content=comment_create.content,
                 commentator_id=comment_create.commentator_id

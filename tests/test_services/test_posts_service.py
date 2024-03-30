@@ -1,7 +1,6 @@
-import pytest
 from BlogFastAPI.app.services.post_service import PostService
 from BlogFastAPI.app.services.user_service import UserService
-from ..tests_auth.db_test import db_session
+from BlogFastAPI.tests.test_configs.db_test import db_session
 
 def test_create_post(db_session):
     # we need to validate owner_id doest it exist in our db

@@ -36,9 +36,9 @@ class CustomHTTPExceptions:
         )
 
     @staticmethod
-    def internal_server_error(status_code, detail: str = "Internal Server Error"):
+    def internal_server_error(detail: str = "Internal Server Error"):
         return HTTPException(
-            status_code=status_code,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="A post with this title already exists"
         )
 
@@ -51,6 +51,7 @@ class CustomHTTPExceptions:
 
     @staticmethod
     def handle_db_exeception(exception: Exception):
+        print(exception)
         if isinstance(exception, exc.OperationalError):
             status_code = status.HTTP_503_SERVICE_UNAVAILABLE
             error_detail = "A database operational error occured"

@@ -1,13 +1,10 @@
-from fastapi.testclient import TestClient
 from BlogFastAPI.app.db.models.models import User
-from BlogFastAPI.app.db.database import SessionLocal
 from BlogFastAPI.app.auth.user_manager.user_auth import (
-    USER_AUTH,
     UserAuth,
     oauth2_scheme
 )
-from BlogFastAPI.tests.tests_auth.db_test import db_session
-from .config import client
+from BlogFastAPI.tests.test_configs.db_test import db_session
+from BlogFastAPI.tests.test_configs.config import client
 
 
 USER_DATA = {

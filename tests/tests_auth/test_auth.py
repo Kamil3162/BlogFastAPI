@@ -1,16 +1,9 @@
-from fastapi.testclient import TestClient
-from BlogFastAPI.app.db.models.models import User
-from BlogFastAPI.app.db.database import SessionLocal
-from BlogFastAPI.app.auth.user_manager.user_auth import (
-    USER_AUTH,
-    UserAuth,
-    oauth2_scheme
-)
-from .config import client
 import pytest
+from BlogFastAPI.tests.test_configs.user_for_test import client
+
 
 @pytest.fixture(scope="module")
-def test_user():
+def test_user(client):
     user_test_data = {
         "email": "testuser@example.com",
         "first_name": "John",
@@ -20,17 +13,20 @@ def test_user():
 
     # Create user
     response = client.post("/register", json=user_test_data)
-    print(response)
     assert response.status_code == 200
 
     return user_test_data
-def test_login_url(test_user):
+def test_login_url(test_user, client):
+    email = test_user.get("email")
+    password = test_user.get("email")
+
     login_data = {
-        "username": test_user["email"],
-        "password": test_user["password"]
+        "username": email,
+        "password": password
     }
 
     response = client.post("/token", data=login_data)
+
     assert response.status_code == 200
     assert "access_token" in response.json()
 

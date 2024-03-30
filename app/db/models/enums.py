@@ -11,3 +11,12 @@ class UserRoles(enum.Enum):
     MODERATOR = "MODERATOR"
     BLOGGER = "BLOGGER"
     ANONYMOUS_USER = "ANONYMOUS_USER"
+
+
+class Categories(enum.Enum):
+    TECHNOLOGY = "TECHNOLOGY"
+    LIFE_STYLE = "LIFE"
+    SELF_DEVELOPMENT = "SELF DEVELOPMENT"
+    AI = "AI"
+    NEWS = "NEWS"
+    PROGRESS = "PROGRESS"

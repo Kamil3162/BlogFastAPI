@@ -33,12 +33,20 @@ class User(Base):
     blacklisted_users = relationship("BlacklistedUser",
                                      back_populates="user",
                                      uselist=False)
+
     def __str__(self):
         return f"User(id={self.id}, email='{self.email}', first_name='{self.first_name}', " \
                f"last_name='{self.last_name}', is_active={self.is_active}, " \
                f"is_verified={self.is_verified}, created_at={self.created_at}, " \
                f"updated_at={self.updated_at})"
 
+class PostCategory(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    category_name = Column(String)
+
+    posts = relationship("PostCategories", back_populates="category")
 
 class Post(Base):
     __tablename__ = 'posts'
@@ -47,13 +55,26 @@ class Post(Base):
     title = Column(String)
     content = Column(String)
     photo_url = Column(String)
+    views = Column(Integer, default=0)
+    mark = Column(Integer, default=1)
 
     owner_id = Column(Integer, ForeignKey('users.id'))
-    views = Column(Integer, default=0)
 
+    categories = relationship("PostCategories", back_populates="post")
     owner = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="post")
     sections = relationship("Section", back_populates="post")
+
+
+class PostCategories(Base):
+    __tablename__ = "posts_categories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey('posts.id'))
+    category_id = Column(Integer, ForeignKey('categories.id'))
+
+    post = relationship("Post", back_populates="categories")
+    category = relationship("PostCategory", back_populates="posts")
 
 class Section(Base):
     __tablename__ = 'sections'

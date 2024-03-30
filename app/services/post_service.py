@@ -91,14 +91,22 @@ class PostService:
     def get_post(db: Session, post_id: int):
         try:
             post = db.query(Post).filter(Post.id == post_id).first()
-            return post
+            post.views += 1
+            db.commit()
         except exc.SQLAlchemyError as e:
             CustomHTTPExceptions.handle_db_exeception(e)
+        else:
+            return post
 
     @staticmethod
     def get_posts(db: Session):
         try:
             posts = db.query(Post).all()
-            return posts
         except exc.SQLAlchemyError as e:
             CustomHTTPExceptions.handle_db_exeception(e)
+        else:
+            return posts
+
+    @staticmethod
+    def rate_post(mark, db: Session):
+        pass

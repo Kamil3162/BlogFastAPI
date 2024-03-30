@@ -8,6 +8,7 @@ class UserMiddleware:
     def check_permission(role: UserRoles):
         def check_user_permission(user = Depends(get_current_user)):
             if user.role.value != role.value:
+                print("czeker permisji")
                 raise CustomHTTPExceptions.forbidden()
             return user
         return check_user_permission

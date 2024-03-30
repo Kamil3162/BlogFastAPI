@@ -1,8 +1,6 @@
-from .config import client
 from BlogFastAPI.app.auth.user_manager import user_auth
-from BlogFastAPI.app.db.database import SessionLocal
 from BlogFastAPI.app.db.models.models import User
-from BlogFastAPI.tests.tests_auth.db_test import db_session
+from BlogFastAPI.tests.test_configs.db_test import db_session
 from datetime import timedelta
 import pytest
 

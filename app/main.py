@@ -20,6 +20,7 @@ from .db.models import models
 from .utils.utils import get_db
 from .middleware.docs_middleware import DocsBlockMiddleware
 from fastapi.middleware.cors import CORSMiddleware
+from BlogFastAPI.app.auth.routers.categories_routers import category_router
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -43,6 +44,7 @@ app.include_router(auth_router)
 app.include_router(create_post_router)
 app.include_router(comment_routers)
 app.include_router(create_ws_app)
+app.include_router(category_router)
 
 env_path = Path(__file__).parent / 'config.env'
 
