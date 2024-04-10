@@ -107,7 +107,6 @@ async def login_for_access_token(
 
 @auth_router.post('/register', response_model=UserResponse)
 async def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    print(user)
     db_user = UserService.create_user(db, user)
     if db_user is None:
         raise HTTPException(

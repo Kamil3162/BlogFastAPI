@@ -108,5 +108,14 @@ class PostService:
             return posts
 
     @staticmethod
+    def get_posts_range(db: Session, page_number=1):
+        try:
+            posts = db.query(Post).limit(10).offset(page_number)
+        except exc.SQLAlchemyError as e:
+            CustomHTTPExceptions.handle_db_exeception(e)
+        else:
+            return posts
+
+    @staticmethod
     def rate_post(mark, db: Session):
         pass

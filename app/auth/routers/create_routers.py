@@ -6,7 +6,7 @@ from fastapi import (
     status,
     Depends
 )
-from typing import List
+from typing import List, Optional
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
 
@@ -27,14 +27,21 @@ async def get_post(post_id: int, db: Session = Depends(get_db)):
     post = PostService.get_post(db, post_id)
     return PostRead.model_validate(post)
 
-@check_db_operations
-@create_post_router.get("/posts", response_model=List[PostRead])
+# @check_db_operations
+@create_post_router.get("/posts/{page_number}", response_model=List[PostRead])
 async def get_posts(
-        current_user: User = Depends(USER_AUTH.get_current_active_user),
+        page_number: str,
+        q: Optional[str] = None,
+        page: int = 1,
+        # current_user: User = Depends(USER_AUTH.get_current_active_user),
         db: Session = Depends(get_db)
 ):
-    all_posts = PostService.get_posts(db)
+    print(page_number)
+    print(q)
+    print(page)
+    all_posts = PostService.get_posts_range(db, page)
     return all_posts
+
 
 @check_db_operations
 @create_post_router.post("/post-create/")
