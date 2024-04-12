@@ -119,3 +119,7 @@ class PostService:
     @staticmethod
     def rate_post(mark, db: Session):
         pass
+
+    @staticmethod
+    def get_newest_post(db: Session):
+        return db.query(Post).first()

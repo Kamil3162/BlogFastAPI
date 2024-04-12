@@ -117,6 +117,12 @@ class BlacklistedUser(Base):
 
     user = relationship("User", back_populates="blacklisted_users")
 
+class PostMark(Base):
+    __tablename__ = "post_mark"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+
 # class Message(Base):
 #     __tablename__ = 'messages'
 #
