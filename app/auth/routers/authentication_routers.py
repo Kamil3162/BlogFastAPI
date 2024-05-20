@@ -34,6 +34,7 @@ from BlogFastAPI.app.middleware.role_middleware import UserMiddleware, UserRoles
 from BlogFastAPI.app.utils.exceptions_functions import CustomHTTPExceptions
 from BlogFastAPI.app.services.email_service import EmailService
 
+
 auth_router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -45,65 +46,89 @@ async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db)
 ):
-    print("to jest request na token")
-    user = USER_AUTH.authenticate_user(
-        db,
-        form_data.username,
-        form_data.password
-    )
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
+    try:
+        user = USER_AUTH.authenticate_user(
+            db,
+            form_data.username,
+            form_data.password
         )
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = USER_AUTH.create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
-    )
+        print(datetime.utcnow())
 
-    refresh_token_expires = timedelta(days=7)
-    refresh_token = USER_AUTH.create_refresh_token(
-        data={"sub": user.email}, expires_delta=refresh_token_expires
-    )
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
-    # Set access token in httpOnly cookie
-    response.set_cookie(key="access_token",
-                        value=access_token,
-                        httponly=True,
-                        max_age=int(access_token_expires.total_seconds()),
-                        path='/')
+        access_token_expires = timedelta(minutes=160)
+        access_token = USER_AUTH.create_access_token(data={"sub": user.email},
+                                                     expires_delta=access_token_expires)
 
-    # Optionally set refresh token in httpOnly cookie if you're using refresh tokens
-    response.set_cookie(key="refresh_token",
-                        value=refresh_token,
-                        httponly=True,
-                        max_age=int(refresh_token_expires.total_seconds()),
-                        path='/')
+        refresh_token_expires = timedelta(days=7)
+        refresh_token = USER_AUTH.create_refresh_token(
+            data={"sub": user.email},
+            expires_delta=refresh_token_expires)
 
-    user_data = {
-        "id": user.id,
-        "email": user.email,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "is_active": user.is_active
-    }
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            max_age=1800,  # Adjust expiration time if needed
+            secure=True,
+            samesite="None",  # Allow cross-site requests
 
-    user_data_json = quote(json.dumps(user_data))
+            # path='/',  # Optionally set path
+        )
 
-    response.set_cookie(key="user_data",
-                        value=user_data_json)
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            max_age=1800,  # Adjust expiration time if needed
+            secure=True,
+            samesite="None",  # Allow cross-site requests
 
-    # Return a JSON response. FastAPI will handle the conversion to JSON.
-    # No need to call response.json() directly, just return the dict.
+            # path='/',  # Optionally set path
+        )
 
-    print("test")
+        user_data = {
+            "id": user.id,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "is_active": user.is_active
+        }
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
+        user_data_json = quote(json.dumps(user_data))
+
+        response.set_cookie(
+            key="user_data",
+            value=user_data_json,
+            httponly=False,  # Adjust as needed
+            secure=True,
+            max_age=1800,  # Adjust expiration time if needed
+            samesite="None",  # Allow cross-site requests
+
+            # path='/',  # Optionally set path
+        )
+
+        print("success")
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+        }
+    except Exception as e:
+        print(e)
+        print("success esa")
+
+        # Return a custom error response
+        return {
+            "error": "An unexpected error occurred",
+            "detail": str(e)
+        }, status.HTTP_500_INTERNAL_SERVER_ERROR
+
 
 @auth_router.post('/register', response_model=UserResponse)
 async def create_user(user: UserCreate, db: Session = Depends(get_db)):

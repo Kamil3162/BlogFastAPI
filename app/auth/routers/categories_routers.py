@@ -31,8 +31,9 @@ async def category_create(
         ),
         db: Session = Depends(get_db)
 ):
-    category = CategoryService.create_category(db, category_scheme)
+    print(category_scheme)
 
+    category = CategoryService.create_category(db, category_scheme)
     return category
 
 @category_router.delete('/delete-category/{category_id}')

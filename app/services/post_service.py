@@ -1,6 +1,6 @@
 from BlogFastAPI.app.auth.schemas.post_schemas import PostCreate, PostRead
 from fastapi import HTTPException, status
-from ..db.models.models import Post, User
+from ..db.models.models import Post, User, PostCategories, PostCategory
 from ..utils.utils import check_post_existance
 from ..utils.exceptions_functions import CustomHTTPExceptions
 from ..utils.exceptions import NotFoundError
@@ -111,6 +111,19 @@ class PostService:
     def get_posts_range(db: Session, page_number=1):
         try:
             posts = db.query(Post).limit(10).offset(page_number)
+        except exc.SQLAlchemyError as e:
+            CustomHTTPExceptions.handle_db_exeception(e)
+        else:
+            return posts
+
+    @staticmethod
+    def get_posts_by_category(db: Session, category_name):
+        try:
+            posts = db.query(Post) \
+                .join(Post.categories) \
+                .join(PostCategory) \
+                .filter(PostCategory.category_name == category_name) \
+                .all()
         except exc.SQLAlchemyError as e:
             CustomHTTPExceptions.handle_db_exeception(e)
         else:

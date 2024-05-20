@@ -89,41 +89,36 @@ class UserAuth:
 
     def authenticate_user(self, db, email: str, password: str):
         user = self.get_user(email=email, db=db)
+        print(user)
+        print(self.verify_password(password, user.hashed_password))
         if not user:
             return False
         if not self.verify_password(password, user.hashed_password):
+
             return False
         return user
 
-    def create_access_token(self, data: dict,
-                            expires_delta: Optional[datetime.timedelta] = None):
-        """
-        :param data:
-        :param expires_delta:
-        :return:
-        """
+    def create_access_token(self, data: dict, expires_delta: Optional[datetime.timedelta] = None):
         to_encode = data.copy()
-        print(to_encode)
         if expires_delta:
-            expire = datetime.datetime.utcnow() + expires_delta
+            expire = datetime.datetime.utcnow() + expires_delta  # Use UTC time
         else:
-            expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
-        to_encode.update({"exp": expire})
+            expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=150)  # Use UTC time
+        to_encode.update({"exp": expire.timestamp()})  # Convert datetime to timestamp
         encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_jwt
 
-    def create_refresh_token(self, data: dict,
-                             expires_delta: Optional[datetime.datetime] = None):
+    def create_refresh_token(self, data: dict, expires_delta: Optional[datetime.timedelta] = None):
         to_encode = data.copy()
         if not expires_delta:
             expires_delta = datetime.timedelta(days=2)
-        expire = datetime.datetime.utcnow() + expires_delta
-        to_encode.update({"exp": expire})
+        expire = datetime.datetime.utcnow() + expires_delta  # Use UTC time
+        to_encode.update({"exp": expire.timestamp()})  # Convert datetime to timestamp
         encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_jwt
 
     def create_reset_password_token(self, email):
-        data = {"sub": email, "exp":datetime.datetime.utcnow() + datetime.timedelta(minutes=20)}
+        data = {"sub": email, "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=20)}  # Use UTC time
         return jwt.encode(data, self.SECRET_KEY, self.ALGORITHM)
 
     def decode_reset_password_token(self, token):

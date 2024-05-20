@@ -54,7 +54,7 @@ class Post(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     content = Column(String)
-    photo_url = Column(String)
+    photo_url = Column(String, nullable=True)
     views = Column(Integer, default=0)
     mark = Column(Integer, default=1)
 
@@ -64,7 +64,7 @@ class Post(Base):
     owner = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="post")
     sections = relationship("Section", back_populates="post")
-
+    post_mark = relationship("PostMark", back_populates="post")
 
 class PostCategories(Base):
     __tablename__ = "posts_categories"
@@ -121,7 +121,9 @@ class PostMark(Base):
     __tablename__ = "post_mark"
 
     id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"))
 
+    post = relationship("Post", back_populates="post_mark")
 
 # class Message(Base):
 #     __tablename__ = 'messages'

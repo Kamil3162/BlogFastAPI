@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-
+from fastapi import File
 from BlogFastAPI.app.auth.schemas.category_schemas import CategoryScheme
 from BlogFastAPI.app.auth.schemas.schemas import UserResponse
 
