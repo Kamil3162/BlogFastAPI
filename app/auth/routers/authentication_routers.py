@@ -54,6 +54,7 @@ async def login_for_access_token(
         )
 
         print(datetime.utcnow())
+        print(user)
 
         if not user:
             raise HTTPException(
