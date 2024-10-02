@@ -1,9 +1,10 @@
 import os
-from ..db.database import SessionLocal
+from ..db.session import SessionLocal
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
-from .exceptions_functions import CustomHTTPExceptions
-from ..db.models.models import RevokedToken, Post
+from .deps import CustomHTTPExceptions
+from ..models.post import Post
+from ..models.token import RevokedToken
 from dotenv import load_dotenv
 from pathlib import Path
 

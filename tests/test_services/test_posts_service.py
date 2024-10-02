@@ -1,5 +1,5 @@
-from BlogFastAPI.app.services.post_service import PostService
-from BlogFastAPI.app.services.user_service import UserService
+from BlogFastAPI.app.services.post import PostService
+from BlogFastAPI.app.services.users import UserService
 from BlogFastAPI.tests.test_configs.db_test import db_session
 
 def test_create_post(db_session):

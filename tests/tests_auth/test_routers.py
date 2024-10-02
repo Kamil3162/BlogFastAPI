@@ -1,5 +1,5 @@
-from BlogFastAPI.app.db.models.models import User
-from BlogFastAPI.app.auth.user_manager.user_auth import (
+from BlogFastAPI.app.models.models import User
+from BlogFastAPI.app.core.security import (
     UserAuth,
     oauth2_scheme
 )

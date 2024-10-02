@@ -1,7 +1,7 @@
 import pytest
-from BlogFastAPI.app.db.database import SessionLocal
+from BlogFastAPI.app.db.session import SessionLocal
 from BlogFastAPI.app.core.config import Settings
-from BlogFastAPI.app.db.database import Base
+from BlogFastAPI.app.db.session import Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 

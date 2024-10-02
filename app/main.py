@@ -1,28 +1,23 @@
-import uvicorn
-import sys
 import json
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from pathlib import Path
-from .core.config import env_path1, settings
-from .auth.routers.routers import router
-from .auth.routers.authentication_routers import auth_router
-from .auth.routers.create_routers import create_post_router
-from .auth.routers.comments_routers import comment_routers
-from .auth.routers.ws_routers import create_ws_app
-from .db.database import (
-    SQLALCHEMY_DATABASE_URL,
-    Base,
-    SessionLocal,
+from sqlalchemy.orm import Session
+from .core.config import settings
+from .auth.routers.blacklist import router
+from .auth.routers.authentication import auth_router
+from .auth.routers.posts import create_post_router
+from .auth.routers.comments import comment_routers
+from .auth.routers.ws import create_ws_app
+from .db.session import (
     engine
 )
-from .db.models import models
+from BlogFastAPI.app.db.init_db import init_db
 from .utils.utils import get_db
-from .middleware.docs_middleware import DocsBlockMiddleware
 from fastapi.middleware.cors import CORSMiddleware
-from BlogFastAPI.app.auth.routers.categories_routers import category_router
+from BlogFastAPI.app.auth.routers.category import category_router
 
-models.Base.metadata.create_all(bind=engine)
+init_db(Session)
 
 app = FastAPI(docs_url='/docs', redoc_url=None)
 # app.add_middleware(DocsBlockMiddleware)
@@ -36,7 +31,6 @@ app.add_middleware(CORSMiddleware,
                    allow_headers=["Access-Control-Allow-Headers",
                                   "Content-Type", "Authorization",
                                   "Access-Control-Allow-Origin", "Set-Cookie"],
-
                    )
 
 app.include_router(router)
@@ -51,30 +45,5 @@ env_path = Path(__file__).parent / 'config.env'
 load_dotenv(dotenv_path=env_path)
 
 
-@app.get('/')
-async def home():
-    return {'key': 'value'}
-
-
-@app.get('/web-chat')
-async def webchat_app():
-    print(settings.POSTGRES_DB)
-    print(get_db())
-    return {'web_chat': 'application'}
-
-
-@app.get("/items/{item_id}")
-async def read_user_item(item_id: str, needy: str):
-    """
-        Needy is obligatory and we have to pass this to our function
-    :param item_id:
-    :param needy:
-    :return:
-    """
-    item = {"item_id": item_id, "needy": needy}
-    return json.dump(item)
-
-
-#
 if __name__ == "__main__":
     pass

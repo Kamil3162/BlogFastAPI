@@ -1,5 +1,5 @@
-from BlogFastAPI.app.auth.user_manager import user_auth
-from BlogFastAPI.app.db.models.models import User
+from BlogFastAPI.app.core import security
+from BlogFastAPI.app.models.models import User
 from BlogFastAPI.tests.test_configs.db_test import db_session
 from datetime import timedelta
 import pytest

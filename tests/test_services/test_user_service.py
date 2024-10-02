@@ -1,10 +1,10 @@
 import pytest
 from fastapi import HTTPException
 
-from BlogFastAPI.app.services.user_service import UserService
-from BlogFastAPI.app.auth.user_manager.user_auth import USER_AUTH
+from BlogFastAPI.app.services.users import UserService
+from BlogFastAPI.app.core.security import USER_AUTH
 from BlogFastAPI.tests.test_configs.db_test import db_session
-from BlogFastAPI.tests.test_configs.user_for_test import client
+
 
 def test_create_user(db_session):
     password = "password"

@@ -1,10 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
-from starlette.types import ASGIApp
 from fastapi import FastAPI
 
-from BlogFastAPI.app.auth.user_manager.user_auth import USER_AUTH
-from BlogFastAPI.app.main import app
+from BlogFastAPI.app.core.security import USER_AUTH
+
 
 class AuthenticatedTestClient(TestClient):
     def __init__(self, application, user_token):
