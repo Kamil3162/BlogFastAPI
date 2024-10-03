@@ -3,8 +3,6 @@ from BlogFastAPI.app.core.config import settings
 from BlogFastAPI.app.api.deps import get_db
 test_endpoints = APIRouter()
 
-
-
 @test_endpoints.get('/')
 async def home():
     return {'key': 'value'}

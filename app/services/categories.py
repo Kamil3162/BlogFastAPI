@@ -50,7 +50,9 @@ class CategoryService:
     def create_category(db: Session, category_scheme: CategoryScheme):
         try:
             category_name = category_scheme.category_name
-            category = CategoryService.check_category_existence(db, category_name)
+            category = CategoryService.check_category_existence(
+                db, category_name
+            )
 
             if category:
                 return False
@@ -66,14 +68,13 @@ class CategoryService:
     @staticmethod
     def category_delete(db: Session, category_id):
         try:
-            category = CategoryService.get_category_by_id(
-                db, category_id
-            )
+            category = CategoryService.get_category_by_id(db, category_id)
             if not category:
                 return False
 
             db.delete(category)
             db.commit()
+
             return True
         except exc.SQLAlchemyError as e:
             db.rollback()

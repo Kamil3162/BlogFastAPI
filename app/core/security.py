@@ -68,7 +68,10 @@ class UserAuth:
         encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_jwt
 
-    def create_refresh_token(self, data: dict, expires_delta: Optional[datetime.timedelta] = None):
+    def create_refresh_token(
+            self, data: dict,
+            expires_delta: Optional[datetime.timedelta] = None
+    ):
         to_encode = data.copy()
         if not expires_delta:
             expires_delta = datetime.timedelta(days=2)
@@ -78,7 +81,11 @@ class UserAuth:
         return encoded_jwt
 
     def create_reset_password_token(self, email):
-        data = {"sub": email, "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=20)}  # Use UTC time
+        data = {
+            "sub": email,
+            # Use UTC time
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=20)
+        }
         return jwt.encode(data, self.SECRET_KEY, self.ALGORITHM)
 
     def decode_reset_password_token(self, token):

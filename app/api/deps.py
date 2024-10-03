@@ -1,9 +1,11 @@
 from typing import Generator, Optional, Annotated
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
+
 from BlogFastAPI.app.core.config import settings
 from BlogFastAPI.app.core.security import UserAuth
 from BlogFastAPI.app.db.session import SessionLocal

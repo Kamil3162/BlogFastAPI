@@ -2,6 +2,7 @@ import json
 from typing import Annotated
 from datetime import timedelta
 from urllib.parse import quote
+
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import (
     HTTPException,
@@ -12,8 +13,8 @@ from fastapi import (
     Cookie
 )
 from fastapi.routing import APIRouter
-
 from sqlalchemy.orm import Session
+
 from BlogFastAPI.app.schemas.user import UserResponse
 from BlogFastAPI.app.schemas.token import TokenStatus, ResetTokenSchemas
 from BlogFastAPI.app.utils.utils import get_db
@@ -135,10 +136,10 @@ async def token_refresh():...
 
 @router.post("/password/reset")
 async def password_reset(
-        email: str,
-        background_tasks: BackgroundTasks,
-        db: Session = Depends(get_db)
-        ):
+    email: str,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
     user = UserService.get_user_by_email(email, db)
     if not user:
         raise CustomHTTPExceptions.not_found(f"User with email:{email} not found")
@@ -152,7 +153,12 @@ async def password_reset(
         "message": "If a user with that email exists, a password reset link has been sent."}
 
 @router.put("/password/reset/{token}")
-async def set_new_password(token: str, password_data: ResetTokenSchemas, db: Session = Depends(get_db)):
+async def set_new_password(
+    token: str,
+    password_data:
+    ResetTokenSchemas,
+    db: Session = Depends(get_db)
+):
     try:
         if password_data.password != password_data.confim_password:
             raise HTTPException(status_code=400,
@@ -167,11 +173,11 @@ async def set_new_password(token: str, password_data: ResetTokenSchemas, db: Ses
         raise HTTPException(status_code=404, detail="Problem with form")
 
 @router.get('/logout')
-async def logout(response: Response,
-                 access_token: str = Cookie(None),
-                 db: Session = Depends(get_db)):
-
-
+async def logout(
+    response: Response,
+    access_token: str = Cookie(None),
+    db: Session = Depends(get_db)
+):
     # code responsible for delete cookies from browser
     response.delete_cookie('access_token')
     response.delete_cookie('refresh_token')

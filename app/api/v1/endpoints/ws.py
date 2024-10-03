@@ -1,7 +1,8 @@
-from fastapi import WebSocket, FastAPI, APIRouter, WebSocketDisconnect
-from BlogFastAPI.app.services.ws import manager
 import json
 import datetime
+
+from fastapi import WebSocket, FastAPI, APIRouter, WebSocketDisconnect
+from BlogFastAPI.app.services.ws import manager
 
 create_ws_app = APIRouter()
 
@@ -17,10 +18,10 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
         current_time = now.strftime("%H:%M")
 
         # filter and send message to particular user based on id
-
         try:
             while True:
-                data_str = await websocket.receive_text()   # text get from ws/react
+                # text get from ws/react
+                data_str = await websocket.receive_text()
 
                 try:
                     data = json.loads(data_str)
