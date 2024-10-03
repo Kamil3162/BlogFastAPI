@@ -14,24 +14,23 @@ from fastapi import (
 from fastapi.routing import APIRouter
 
 from sqlalchemy.orm import Session
-from ..schemas.schemas import(
-    UserResponse)
-from ..schemas.token_schemas import TokenStatus, \
-    ResetTokenSchemas
+from BlogFastAPI.app.schemas.user import UserResponse
+from BlogFastAPI.app.schemas.token import TokenStatus, ResetTokenSchemas
 from BlogFastAPI.app.utils.utils import get_db
-from ..user_manager.user_auth import USER_AUTH, oauth2_scheme, check_token_status
-from ..schemas.schemas import UserCreate
+from BlogFastAPI.app.core.security import USER_AUTH, oauth2_scheme
+from BlogFastAPI.app.api.deps import check_token_status
+from BlogFastAPI.app.schemas.user import UserCreate
 from BlogFastAPI.app.services.users import UserService
 from BlogFastAPI.app.utils.deps import CustomHTTPExceptions
 from BlogFastAPI.app.services.email import EmailService
 
 
-auth_router = APIRouter()
+router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = oauth2_scheme
 
-@auth_router.post("/token")
+@router.post("/token")
 async def login_for_access_token(
     response: Response,  # Add the response parameter to set cookies
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
@@ -114,7 +113,7 @@ async def login_for_access_token(
         }, status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-@auth_router.post('/register', response_model=UserResponse)
+@router.post('/register', response_model=UserResponse)
 async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = UserService.create_user(db, user)
     if db_user is None:
@@ -127,14 +126,14 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 
-@auth_router.get("/valid/token", response_model=TokenStatus)
+@router.get("/valid/token", response_model=TokenStatus)
 async def token_valid(token_status = Depends(check_token_status)):
     return token_status
 
-@auth_router.post("/token/refresh")
+@router.post("/token/refresh")
 async def token_refresh():...
 
-@auth_router.post("/password/reset")
+@router.post("/password/reset")
 async def password_reset(
         email: str,
         background_tasks: BackgroundTasks,
@@ -152,7 +151,7 @@ async def password_reset(
     return {
         "message": "If a user with that email exists, a password reset link has been sent."}
 
-@auth_router.put("/password/reset/{token}")
+@router.put("/password/reset/{token}")
 async def set_new_password(token: str, password_data: ResetTokenSchemas, db: Session = Depends(get_db)):
     try:
         if password_data.password != password_data.confim_password:
@@ -167,7 +166,7 @@ async def set_new_password(token: str, password_data: ResetTokenSchemas, db: Ses
     except HTTPException:
         raise HTTPException(status_code=404, detail="Problem with form")
 
-@auth_router.get('/logout')
+@router.get('/logout')
 async def logout(response: Response,
                  access_token: str = Cookie(None),
                  db: Session = Depends(get_db)):
@@ -180,7 +179,7 @@ async def logout(response: Response,
     return {'logout': 'success'}
 
 
-@auth_router.get("/validate")
+@router.get("/validate")
 async def validate_token(access_token: str = Cookie(None)):
     if access_token is None:
         return {"authenticated": False}
@@ -197,7 +196,7 @@ async def validate_token(access_token: str = Cookie(None)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-@auth_router.get('/test')
+@router.get('/test')
 async def test(token: Annotated[str, Depends(oauth2_scheme)]):
     """
         Test function to generate a session
