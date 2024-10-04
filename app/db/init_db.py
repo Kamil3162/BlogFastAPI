@@ -1,4 +1,3 @@
-
 # First we import session to generate connection with out db
 from sqlalchemy.orm import Session
 from .session import engine

@@ -1,10 +1,13 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
-from starlette.middleware.base import BaseHTTPMiddleware, \
+from starlette.middleware.base import (
+    BaseHTTPMiddleware,
     RequestResponseEndpoint
-from BlogFastAPI.app.utils.deps import CustomHTTPExceptions
+)
 from starlette.responses import Response
+
+from BlogFastAPI.app.utils.deps import CustomHTTPExceptions
 
 
 class DataBaseErrorMiddleware(BaseHTTPMiddleware):
