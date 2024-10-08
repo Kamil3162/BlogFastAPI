@@ -1,12 +1,12 @@
 from fastapi import Depends, HTTPException, status
-from BlogFastAPI.app.api.deps import get_current_user
+from BlogFastAPI.app.api.deps import authenticate_user_from_token
 from BlogFastAPI.app.core.enums import UserRoles
 from BlogFastAPI.app.utils.deps import CustomHTTPExceptions
 class UserMiddleware:
 
     @staticmethod
     def check_permission(roles: UserRoles):
-        def check_user_permission(current_user = Depends(get_current_user)):
+        def check_user_permission(current_user = Depends(authenticate_user_from_token)):
             if user.role.value not in roles:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,

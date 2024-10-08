@@ -7,7 +7,6 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from BlogFastAPI.app.core.config import settings
-from BlogFastAPI.app.core.security import UserAuth
 from BlogFastAPI.app.db.session import SessionLocal
 from BlogFastAPI.app.models.user import User
 from BlogFastAPI.app.schemas.token import Token
@@ -23,17 +22,15 @@ def get_db() -> Generator:
     finally:
         db.close()
 
-def get_current_user(
+def authenticate_user_from_token(
     db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
 ) -> User:
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[ALGORITHM]
         )
-
-        print(payload)
-
         token_data = TokenPayload(**payload)
+
     except (JWTError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -44,15 +41,16 @@ def get_current_user(
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+
 def get_current_active_user(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(authenticate_user_from_token),
 ) -> User:
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 def get_current_active_superuser(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(authenticate_user_from_token),
 ) -> User:
     if not current_user.is_superuser:
         raise HTTPException(
@@ -60,20 +58,8 @@ def get_current_active_superuser(
         )
     return current_user
 
-async def check_token_status(
-        token: str = Depends(oauth2_scheme),
-        db: Session = Depends(get_db)  # Injecting the database session here
-):
-    try:
-        decoded_jwt = decode_jwt(token)
-
-        token_data = TokenStatus(is_valid=True)
-        return token_data
-    except JWTError:
-        return TokenStatus(is_valid=False)
-
 async def get_admin_user(
-    self, current_user: Annotated[User, Depends(get_current_user)]
+    self, current_user: Annotated[User, Depends(authenticate_user_from_token)]
 ):
     if current_user.role != UserRoles.ADMIN.value:
         raise HTTPException(status_code=401, detail="You havent permission to change and check this data")

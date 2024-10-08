@@ -20,13 +20,14 @@ class BrokerSettings:
     API_V1_STR: str = "/api/v1"
 
     # RabbitMQ settings
-    RABBITMQ_HOST = "localhost"
-    RABBITMQ_PORT = "5672"
-    RABBITMQ_USER = "USER"
-    RABBITMQ_PASS = "PASS"
+    RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
+    RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
+    RABBITMQ_USER = os.getenv("RABBITMQ_USER")
+    RABBITMQ_PASS = os.getenv("RABBITMQ_PASS")
 
     # Celery settings
-    CELERY_BROKER_URL: str = f"amqp://{RABBITMQ_USER}:{RABBITMQ_PASS}@{RABBITMQ_HOST}:{RABBITMQ_PORT}//"
+    CELERY_BROKER_URL: str = f"amqp://\
+    {RABBITMQ_USER}:{RABBITMQ_PASS}@{RABBITMQ_HOST}:{RABBITMQ_PORT}//"
     CELERY_RESULT_BACKEND: str = "rpc://"
 
     class Config:
