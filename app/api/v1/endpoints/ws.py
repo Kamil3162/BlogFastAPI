@@ -9,7 +9,6 @@ create_ws_app = APIRouter()
 @create_ws_app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: str):
 
-    print(websocket, user_id)
     if user_id:
         await manager.connect(user_id, websocket)
         await manager.send_online_status(user_id)
