@@ -17,4 +17,4 @@ RUN pip install -r requirements.txt
 ENV PYTHONPATH=/BlogFastAPI
 
 # copy project
-CMD ["uvicorn", "app.main", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "BlogFastAPI.app.main", "--host", "0.0.0.0", "--port", "8000"]
