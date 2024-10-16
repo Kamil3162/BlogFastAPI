@@ -8,13 +8,13 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
 # import my packag
-from BlogFastAPI.app.core.config import settings
-from BlogFastAPI.app.db.session import engine
-from BlogFastAPI.app.utils.utils import get_db
-from BlogFastAPI.app.db.init_db import init_db
-from BlogFastAPI.app.api.v1.router import api_router
-from BlogFastAPI.app.middleware.database import DataBaseErrorMiddleware
-from BlogFastAPI.app.middleware.docs import DocsBlockMiddleware
+from .core.config import settings
+from db.session import engine
+from .utils.utils import get_db
+from .db.init_db import init_db
+from .api.v1.router import api_router
+from .middleware.database import DataBaseErrorMiddleware
+from .middleware.docs import DocsBlockMiddleware
 
 
 init_db(Session)

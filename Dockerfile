@@ -1,10 +1,10 @@
-# Dockerfile
+ Dockerfile
 
 # pull the official docker image
 FROM python:3.9
 
 # set work directory
-WORKDIR /BlogFastAPI
+WORKDIR /app
 
 # set env variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -17,4 +17,4 @@ RUN pip install -r requirements.txt
 ENV PYTHONPATH=/BlogFastAPI
 
 # copy project
-CMD ["uvicorn", "BlogFastAPI.app.main", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

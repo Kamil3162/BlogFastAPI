@@ -1,5 +1,5 @@
 from celery import Celery
-from BlogFastAPI.app.core.config import broker_settings
+from .core.config import broker_settings
 
 
 celery = Celery(__name__)
