@@ -4,7 +4,7 @@
 FROM python:3.9
 
 # set work directory
-WORKDIR /app
+WORKDIR /BlogFastAPI
 
 # set env variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -14,5 +14,7 @@ ENV PYTHONUNBUFFERED 1
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+ENV PYTHONPATH=/BlogFastAPI
+
 # copy project
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main", "--host", "0.0.0.0", "--port", "8000"]
