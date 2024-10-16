@@ -7,8 +7,7 @@ from fastapi import FastAPI
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
-# from BlogFastAPI.app.core.config import settings
-from .core.config import settings
+from BlogFastAPI.core.config import settings
 from BlogFastAPI.app.db.session import engine
 from BlogFastAPI.app.utils.utils import get_db
 from BlogFastAPI.app.db.init_db import init_db
