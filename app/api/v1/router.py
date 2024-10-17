@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from BlogFastAPI.app.api.v1.endpoints import (
+from .endpoints import (
     users,
     auth,
     posts,

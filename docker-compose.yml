@@ -1,4 +1,4 @@
-ersion: '3.8'
+version: '3.8'
 services:
   web:
     build: .
@@ -10,7 +10,7 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=postgresql://postgres:admin@localhost:5432/FastApiBlogOfficial
+      - DATABASE_URL=postgresql://postgres:admin@db:5432/FastApiBlogOfficial
 
   db:
     image: postgres

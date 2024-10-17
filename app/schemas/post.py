@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
-from BlogFastAPI.app.schemas.category import CategoryScheme
-from BlogFastAPI.app.schemas.user import UserResponse
+from .category import CategoryScheme
+from .user import UserResponse
 
 
 class PostCreate(BaseModel):

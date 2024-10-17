@@ -5,7 +5,7 @@ from ..db.session import SessionLocal
 from ..db.session import SessionLocal
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
-from ...app.models.post import Post
+from ..models.post import Post
 from .deps import CustomHTTPExceptions
 from ..models.token import RevokedToken
 from dotenv import load_dotenv

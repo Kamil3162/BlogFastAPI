@@ -8,10 +8,10 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
 # import my packag
-from auth import auth_utils
-from core.config import settings
-from db.session import engine
-from utils.utils import get_db
+from .auth import auth_utils
+from .core.config import settings
+from .db.session import engine
+from .utils.utils import get_db
 from .db.init_db import init_db
 from .api.v1.router import api_router
 from .middleware.database import DataBaseErrorMiddleware
