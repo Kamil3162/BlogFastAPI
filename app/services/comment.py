@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import exc
-from BlogFastAPI.app.schemas.comment import (
+from ..schemas.comment import (
     CommentScheme
 )
-from BlogFastAPI.app.models.comment import Comment
-from BlogFastAPI.app.services.post import PostService
-from BlogFastAPI.app.utils.utils import CustomHTTPExceptions
-from BlogFastAPI.app.utils.exceptions import NotFoundError
+from ..models.comment import Comment
+from ..services.post import PostService
+from ..utils.utils import CustomHTTPExceptions
+from ..utils.exceptions import NotFoundError
 class CommentService:
     @staticmethod
     def comment_create(comment_create: CommentScheme, db: Session):

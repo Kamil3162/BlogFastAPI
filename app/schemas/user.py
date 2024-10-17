@@ -1,7 +1,9 @@
-from pydantic import BaseModel, EmailStr, Field
-from BlogFastAPI.app.core.enums import UserRoles
 from typing import Optional, TypeVar
 from datetime import datetime
+
+from pydantic import BaseModel, EmailStr, Field
+
+from ..core.enums import UserRoles
 
 
 T = TypeVar('T')

@@ -1,22 +1,24 @@
 import os
+import datetime
+from typing import Optional, Annotated
+
 from pathlib import Path
 from dotenv import load_dotenv
-from BlogFastAPI.app.utils.utils import get_db, decode_jwt
-from BlogFastAPI.app.core.enums import UserRoles
-from BlogFastAPI.app.utils.deps import CustomHTTPExceptions
+
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException
-from BlogFastAPI.app.schemas.token import TokenData, TokenStatus
 from fastapi import Depends
-from typing import Optional, Annotated
 from jose import jwt, JWTError, exceptions
 from sqlalchemy.orm import Session
-from BlogFastAPI.app.api.deps import authenticate_user_from_token
-import datetime
 
 from ..models.user import User
+from ..api.deps import authenticate_user_from_token
+from ..utils.utils import get_db, decode_jwt
+from ..core.enums import UserRoles
+from ..utils.deps import CustomHTTPExceptions
 
+from ..schemas.token import TokenData, TokenStatus
 config_file = Path(__file__).parent.parent / 'config.env'
 load_dotenv(config_file)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
@@ -28,7 +30,6 @@ async def check_token_status(
 ):
     try:
         decoded_jwt = decode_jwt(token)
-
         token_data = TokenStatus(is_valid=True)
         return token_data
     except JWTError:

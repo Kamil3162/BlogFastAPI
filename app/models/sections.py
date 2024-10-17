@@ -9,8 +9,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from datetime import datetime
-from BlogFastAPI.app.db.session import Base
-from BlogFastAPI.app.core.enums import BlacklistReason, UserRoles
+from ..db.session import Base
+from ..core.enums import BlacklistReason, UserRoles
+
 class Section(Base):
     __tablename__ = 'sections'
     id = Column(Integer, primary_key=True, index=True)

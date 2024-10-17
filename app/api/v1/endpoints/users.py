@@ -3,14 +3,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from BlogFastAPI.app.schemas.user import UserSchemeOfficial, UserUpdate, UserRoleScheme
-from BlogFastAPI.app.core.security import USER_AUTH, oauth2_scheme, check_token_status
-from BlogFastAPI.app.api.deps import get_current_active_user, get_admin_user
-from BlogFastAPI.app.core.enums import UserRoles
-from BlogFastAPI.app.models.user import User
-from BlogFastAPI.app.middleware.role import UserMiddleware
-from BlogFastAPI.app.services.users import UserService
-from BlogFastAPI.app.utils.utils import get_db
+from ....schemas.user import UserSchemeOfficial, UserUpdate, UserRoleScheme
+from ....core.security import USER_AUTH, oauth2_scheme, check_token_status
+from ....api.deps import get_current_active_user, get_admin_user
+from ....core.enums import UserRoles
+from ....models.user import User
+from ....middleware.role import UserMiddleware
+from ....services.users import UserService
+from ....utils.utils import get_db
 
 router = APIRouter()
 

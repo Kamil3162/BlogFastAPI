@@ -19,6 +19,7 @@ from BlogFastAPI.app.utils.utils import get_db
 from BlogFastAPI.app.core.security import USER_AUTH, oauth2_scheme
 from BlogFastAPI.app.api.deps import check_token_status
 from BlogFastAPI.app.schemas.user import UserCreate
+from ...schemas.user import
 from BlogFastAPI.app.schemas.user import UserResponse
 from BlogFastAPI.app.schemas.token import TokenStatus, ResetTokenSchemas
 from BlogFastAPI.app.services.users import UserService

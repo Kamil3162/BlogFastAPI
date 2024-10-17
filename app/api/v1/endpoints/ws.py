@@ -2,7 +2,7 @@ import json
 import datetime
 
 from fastapi import WebSocket, FastAPI, APIRouter, WebSocketDisconnect
-from BlogFastAPI.app.services.ws import manager
+from ....services.ws import manager
 
 create_ws_app = APIRouter()
 

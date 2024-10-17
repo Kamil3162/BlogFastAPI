@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import exc
-from BlogFastAPI.app.models.post import Post
-from BlogFastAPI.app.utils.deps import CustomHTTPExceptions
-from BlogFastAPI.app.models.category import PostCategory
-from BlogFastAPI.app.schemas.category import (
+from ..models.post import Post
+from ..utils.deps import CustomHTTPExceptions
+from ..models.category import PostCategory
+from ..schemas.category import (
     CategoryScheme
 )
 

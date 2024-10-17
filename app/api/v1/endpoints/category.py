@@ -2,13 +2,13 @@ from fastapi import Depends
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
 
-from BlogFastAPI.app.api.deps import get_current_active_user
-from BlogFastAPI.app.models.user import User
-from BlogFastAPI.app.utils.utils import get_db
-from BlogFastAPI.app.services.categories import CategoryService
-from BlogFastAPI.app.middleware.role import UserMiddleware
-from BlogFastAPI.app.core.enums import UserRoles
-from BlogFastAPI.app.schemas.category import (
+from ....api.deps import get_current_active_user
+from ....models.user import User
+from ....utils.utils import get_db
+from ....services.categories import CategoryService
+from ....middleware.role import UserMiddleware
+from ....core.enums import UserRoles
+from ....schemas.category import (
     CategoryScheme
 )
 

@@ -4,13 +4,13 @@ from fastapi import Depends, Query
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
 
-from BlogFastAPI.app.utils.utils import get_db
-from BlogFastAPI.app.schemas.post import PostCreate, PostRead, PostUpdate
-from BlogFastAPI.app.models.user import User
-from BlogFastAPI.app.models.post import Post
-from BlogFastAPI.app.services.post import PostService
-from BlogFastAPI.app.services.users import UserService
-from BlogFastAPI.app.api.deps import get_current_active_user
+from ....utils.utils import get_db
+from ....schemas.post import PostCreate, PostRead, PostUpdate
+from ....models.user import User
+from ....models.post import Post
+from ....services.post import PostService
+from ....services.users import UserService
+from ....api.deps import get_current_active_user
 
 router = APIRouter()
 

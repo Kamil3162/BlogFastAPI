@@ -6,10 +6,10 @@ from jose import jwt, JWTError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from BlogFastAPI.app.core.config import settings
-from BlogFastAPI.app.db.session import SessionLocal
-from BlogFastAPI.app.models.user import User
-from BlogFastAPI.app.schemas.token import Token
+from ..core.config import settings
+from ..db.session import SessionLocal
+from ..models.user import User
+from ..schemas.token import Token
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl='token'

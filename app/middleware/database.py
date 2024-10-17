@@ -7,7 +7,7 @@ from starlette.middleware.base import (
 )
 from starlette.responses import Response
 
-from BlogFastAPI.app.utils.deps import CustomHTTPExceptions
+from ..utils.deps import CustomHTTPExceptions
 
 
 class DataBaseErrorMiddleware(BaseHTTPMiddleware):

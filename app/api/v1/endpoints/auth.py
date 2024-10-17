@@ -15,19 +15,18 @@ from fastapi import (
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
 
-from BlogFastAPI.app.schemas.user import UserResponse
-from BlogFastAPI.app.schemas.token import TokenStatus, ResetTokenSchemas
-from BlogFastAPI.app.utils.utils import get_db
-from BlogFastAPI.app.core.security import (
+from ....schemas.user import UserResponse
+from ....schemas.token import TokenStatus, ResetTokenSchemas
+from ....utils.utils import get_db
+from ....core.security import (
     USER_AUTH,
     oauth2_scheme,
     check_token_status
 )
-from BlogFastAPI.app.schemas.user import UserCreate
-from BlogFastAPI.app.services.users import UserService
-from BlogFastAPI.app.utils.deps import CustomHTTPExceptions
-from BlogFastAPI.app.services.email import EmailService
-
+from ....schemas.user import UserCreate
+from ....services.users import UserService
+from ....utils.deps import CustomHTTPExceptions
+from ....services.email import EmailService
 
 router = APIRouter()
 

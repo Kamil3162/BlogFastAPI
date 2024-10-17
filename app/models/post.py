@@ -11,8 +11,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from BlogFastAPI.app.db.session import Base
-from BlogFastAPI.app.core.enums import BlacklistReason, UserRoles
+from ..db.session import Base
+from ..core.enums import BlacklistReason, UserRoles
+
 class Post(Base):
     __tablename__ = 'posts'
 

@@ -1,10 +1,14 @@
+
+# Import builtin modules
+from typing import Annotated, List
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from ..schemas.schemas import BlacklistedUserSchema
-from ..user_manager.user_auth import oauth2_scheme
-from BlogFastAPI.app.utils.utils import get_db
-from BlogFastAPI.app.services.users import UserService
-from typing import Annotated, List
+
+from ....schemas.user import BlacklistedUserSchema
+from ....core.security import oauth2_scheme
+from ....utils.utils import get_db
+from ....services.users import UserService
 
 router = APIRouter()
 

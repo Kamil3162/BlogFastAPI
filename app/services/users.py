@@ -1,12 +1,13 @@
+from typing import List
+
 from sqlalchemy.orm import Session
 
-from BlogFastAPI.app.schemas.token import ResetTokenSchemas
+from ..schemas.token import ResetTokenSchemas
 from ..models.user import User, BlacklistedUser
-from BlogFastAPI.app.core.security import USER_AUTH
-from BlogFastAPI.app.utils.deps import CustomHTTPExceptions
-from BlogFastAPI.app.core.enums import UserRoles
-from BlogFastAPI.app.schemas.user import UserSchemeOfficial
-from typing import List
+from ..core.security import USER_AUTH
+from ..utils.deps import CustomHTTPExceptions
+from ..core.enums import UserRoles
+from ..schemas.user import UserSchemeOfficial
 class UserService:
 
     @staticmethod

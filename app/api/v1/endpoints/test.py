@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 from pathlib import Path
 from fastapi.routing import APIRouter
-from BlogFastAPI.app.core.config import settings
-from BlogFastAPI.app.api.deps import get_db
+from ....core.config import settings
+from ....api.deps import get_db
 
 router = APIRouter()
 

@@ -1,7 +1,7 @@
-from BlogFastAPI.app.schemas.post import PostCreate, PostRead
-from BlogFastAPI.app.models.post import Post
-from BlogFastAPI.app.models.user import User
-from BlogFastAPI.app.models.category import PostCategory
+from ..schemas.post import PostCreate, PostRead
+from ..models.post import Post
+from ..models.user import User
+from ..models.category import PostCategory
 from ..utils.deps import CustomHTTPExceptions
 from ..utils.exceptions import NotFoundError
 from sqlalchemy.orm import Session

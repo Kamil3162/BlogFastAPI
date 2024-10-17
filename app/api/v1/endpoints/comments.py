@@ -2,11 +2,11 @@ from fastapi import Depends
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
 
-from BlogFastAPI.app.schemas.comment import CommentScheme, CommentUpdate
-from BlogFastAPI.app.utils.utils import get_db
-from BlogFastAPI.app.models.user import User
-from BlogFastAPI.app.services.comment import CommentService
-from BlogFastAPI.app.api.deps import get_current_active_user
+from ....schemas.comment import CommentScheme, CommentUpdate
+from ....utils.utils import get_db
+from ....models.user import User
+from ....services.comment import CommentService
+from ....api.deps import get_current_active_user
 
 router = APIRouter()
 
