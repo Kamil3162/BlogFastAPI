@@ -10,7 +10,12 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=postgresql://postgres:admin@db:5432/FastApiBlogOfficial
+#      - DATABASE_URL=postgresql://postgres:admin@db:5432/FastApiBlogOfficial
+      - POSTGRES_SERVER=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=FastApiBlogOfficial
+      - POSTGRES_PORT=5432
 
   db:
     image: postgres

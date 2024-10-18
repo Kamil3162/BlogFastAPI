@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from fastapi import Request
 from pathlib import Path
 from fastapi.routing import APIRouter
 from ....core.config import settings
@@ -12,6 +13,11 @@ main_directory_name = Path(__name__).parent.parent
 async def home():
     print(main_directory_name)
     return {'key': 'value'}
+
+@router.get('/test-get')
+async def test_req(request: Request):
+    client = request.client.host
+    return {"client:":client}
 
 
 @router.get('/web-chat')
