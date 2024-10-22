@@ -33,6 +33,7 @@ jobs:
           script: |
             echo "Connection successful"
             cd /home/ubuntu/blog_repository/BlogFastAPI
+            sudo su
             git pull origin dev
             docker compose down
             docker compose up -d --build
