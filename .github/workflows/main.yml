@@ -1,5 +1,4 @@
-name: CI/CD Pipeline
-
+name: CI/CD
 on:
   push:
     branches: [ dev ]
@@ -7,42 +6,37 @@ on:
     branches: [ dev ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Run tests
-      run: |
-        # Add your test command here, for example:
-        # pytest
-
   build-and-deploy:
-    needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     steps:
-    - name: Deploy to VPS
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        port: ${{ secrets.SERVER_PORT }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          echo "Connection successful test32132112"
-          pwd
-
-          cd /home/ubuntu/blog_repository/BlogFastAPI
-          sudo su
-
-          git pull origin dev
-          docker-compose down
-          docker-compose up -d
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          # Add your test command here
+          # pytest
+          
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Connection successful"
+            cd /home/ubuntu/blog_repository/BlogFastAPI
+            git pull origin dev
+            docker compose down
+            docker compose up -d --build
