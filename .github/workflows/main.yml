@@ -40,7 +40,7 @@ jobs:
       run: |
         echo "Connection successful"
 
-        cd /home/ubuntu/blog_repository/BlogFastAPI
+        cd /home/ubuntu/blog_repository/BlogFastAPI/
         sudo su
 
         git pull origin dev
