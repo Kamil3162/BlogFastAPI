@@ -34,11 +34,10 @@ jobs:
       USERNAME: ${{ secrets.SERVER_USER }}
       SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
     steps:
-    - uses: actions/checkout@v2
-
+    - uses: appleboy/ssh-action@v1.0.0.
     - name: Deploy to VPS
-      run: |
-        echo "Connection successful test"
+      script: |
+        echo "Connection successful test32132112"
         pwd
 
         cd /home/ubuntu/blog_repository/BlogFastAPI
