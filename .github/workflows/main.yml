@@ -34,15 +34,16 @@ jobs:
       USERNAME: ${{ secrets.SERVER_USER }}
       SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
     steps:
-    - uses: appleboy/ssh-action@v1.0.0
     - name: Deploy to VPS
-      script: |
-        echo "Connection successful test32132112"
-        pwd
+      uses: appleboy/ssh-action@master
+      with: 
+        script: |
+          echo "Connection successful test32132112"
+          pwd
 
-        cd /home/ubuntu/blog_repository/BlogFastAPI
-        sudo su
+          cd /home/ubuntu/blog_repository/BlogFastAPI
+          sudo su
 
-        git pull origin dev
-        docker-compose down
-        docker-compose up -d
+          git pull origin dev
+          docker-compose down
+          docker-compose up -d
