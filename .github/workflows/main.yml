@@ -32,10 +32,14 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo "Connection successful"
+
             sudo su
             ls -ll
-            pwd 
+
             cd /home/ubuntu/blog_repository/BlogFastAPI
+
+            pwd
+
             git pull origin dev
             docker compose down
             docker compose up -d --build
