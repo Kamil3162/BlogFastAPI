@@ -39,9 +39,9 @@ jobs:
     - name: Deploy to VPS
       run: |
         echo "Connection successful test"
-
         pwd
-        cd /home/ubuntu/blog_repository/BlogFastAPI/
+
+        cd /home/ubuntu/blog_repository/BlogFastAPI
         sudo su
 
         git pull origin dev
