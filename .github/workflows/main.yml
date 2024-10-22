@@ -39,7 +39,7 @@ jobs:
     - name: Deploy to VPS
       run: |
         echo "Connection successful"
-
+        pwd
         cd /home/ubuntu/blog_repository/BlogFastAPI/
         sudo su
 
