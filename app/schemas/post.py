@@ -1,5 +1,9 @@
+from typing import Optional, List
+from datetime import datetime
+
 from pydantic import BaseModel
-from typing import Optional
+
+from .comment import CommentTemplate
 from .category import CategoryScheme
 from .user import UserResponse
 
@@ -9,6 +13,7 @@ class PostCreate(BaseModel):
     content: str
     photo_url: Optional[str] = None
     owner_id: int
+
 
 class PostRead(BaseModel):
     id: int
@@ -20,9 +25,11 @@ class PostRead(BaseModel):
     class Config:
         from_attributes = True
 
+
 class PostUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
+
 
 class PostAdminInformation(BaseModel):
     title: str
@@ -30,3 +37,25 @@ class PostAdminInformation(BaseModel):
     owner: UserResponse
     views: int
     rating: int
+
+
+class PostStats(BaseModel):
+    total_views: int
+    upvotes: int
+    downvotes: int
+
+
+class PostResponse:
+    id: int
+    title: str
+    content: str
+    photo_url: Optional[str]
+    created_at: datetime
+    stats: PostStats
+
+    class Config:
+        from_attributes = True
+
+class PostWithComments(BaseModel):
+    post: PostResponse
+    comments: List[CommentTemplate]

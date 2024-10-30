@@ -59,3 +59,8 @@ class CommentService:
         db.delete(comment_instance)
         db.commit()
         return {'status': 'deleted'}
+
+    @staticmethod
+    def get_comments_by_post_id(post_id, db: Session):
+        comments_instance = db.execute(Comment).where(Comment.post_id == post_id)
+        return comments_instance

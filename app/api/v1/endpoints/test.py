@@ -17,7 +17,7 @@ async def home():
 @router.get('/test-get')
 async def test_req(request: Request):
     client = request.client.host
-    return {"client:":client}
+    return {"client:": client}
 
 
 @router.get('/web-chat')

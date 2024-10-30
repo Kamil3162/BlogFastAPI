@@ -2,7 +2,7 @@ import os
 # from app.db.session import SessionLocal
 # from ...app.db.session import SessionLocal
 from ..db.session import SessionLocal
-from ..db.session import SessionLocal
+from ..core.config import settings_redis
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 from ..models.post import Post
@@ -10,6 +10,9 @@ from .deps import CustomHTTPExceptions
 from ..models.token import RevokedToken
 from dotenv import load_dotenv
 from pathlib import Path
+from redis import Redis
+
+
 
 config_file = Path(__file__).parent.parent / 'config.env'
 load_dotenv(config_file)
@@ -22,6 +25,16 @@ def get_db():
     finally:
         db.close()
 
+def get_redis():
+    redis = Redis(
+        host=settings_redis.REDIS_HOST,
+        port=settings_redis.REDIS_PORT,
+        db=settings_redis.REDIS_DB_NAME
+    )
+    try:
+        yield redis
+    finally:
+        redis.close()
 
 def decode_jwt(token: str) -> dict:
     try:

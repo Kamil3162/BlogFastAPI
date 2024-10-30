@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from pydantic_settings import BaseSettings
 
 env_path1 = Path(__file__).parent.parent / 'config.env'
 load_dotenv(dotenv_path=env_path1)
@@ -33,6 +34,20 @@ class BrokerSettings:
     class Config:
         env_file = ".env"
 
+class RedisSettings(BaseSettings):
+    REDIS_HOST: str = "localhost"
+    REDIS_PASSWORD: str = "password"
+    REDIS_HOST: str = "127.0.0.1"
+    REDIS_DB_NAME: str = "redis-handler"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    POSTS_PER_PAGE: int = 10
+    STATS_CACHE_SECONDS: int = 300  # 5 minutes
+
+
+
+
 settings = Settings()
+settings_redis = RedisSettings()
 broker_settings = BrokerSettings()
 

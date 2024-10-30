@@ -5,7 +5,7 @@ from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
 
 from ....utils.utils import get_db
-from ....schemas.post import PostCreate, PostRead, PostUpdate
+from ....schemas.post import PostCreate, PostRead, PostUpdate, PostWithComments
 from ....models.user import User
 from ....models.post import Post
 from ....services.post import PostService
@@ -14,10 +14,11 @@ from ....api.deps import get_current_active_user
 
 router = APIRouter()
 
-@router.get("/post/{post_id}/", response_model=PostRead)
+@router.get("/post/{post_id}/", response_model=PostWithComments)
 async def get_post(post_id: int, db: Session = Depends(get_db)):
-    post = PostService.get_post(db, post_id)
-    return PostRead.model_validate(post)
+    post = PostService.get_post_with_comments(post_id)
+    return PostWithComments.model_validate(post)
+
 
 @router.get("/posts", response_model=List[PostRead])
 async def get_posts(
@@ -51,9 +52,8 @@ async def create_post(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    print(post)
     user = UserService.get_user_by_id(db, post.owner_id)
-    created_post = PostService.create_post(post, db)
+    created_post = PostService.create_post(post, db, user)
     return created_post
 
 @router.put("/post-update/{post_id}/")

@@ -17,9 +17,6 @@ from .api.v1.router import api_router
 from .middleware.database import DataBaseErrorMiddleware
 from .middleware.docs import DocsBlockMiddleware
 
-
-init_db(Session)
-
 app = FastAPI(docs_url='/docs', redoc_url=None)
 
 app.add_middleware(
@@ -44,4 +41,5 @@ env_path = Path(__file__).parent / 'config.env'
 load_dotenv(dotenv_path=env_path)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=7000)
+    init_db()

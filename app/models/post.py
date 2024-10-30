@@ -7,13 +7,15 @@ from sqlalchemy import (
     Integer,
     String,
     DateTime,
-    Enum)
+    Enum,
+    UniqueConstraint
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from ..db.session import Base
 from ..core.enums import BlacklistReason, UserRoles
-
+from ..core.enums import VoteType
 class Post(Base):
     __tablename__ = 'posts'
 
@@ -22,7 +24,8 @@ class Post(Base):
     content = Column(String)
     photo_url = Column(String, nullable=True)
     views = Column(Integer, default=0)
-    mark = Column(Integer, default=1)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     owner_id = Column(Integer, ForeignKey('users.id'))
 
@@ -30,7 +33,38 @@ class Post(Base):
     owner = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="post")
     sections = relationship("Section", back_populates="post")
-    post_mark = relationship("PostMark", back_populates="post")
+    votes = relationship("PostVote", back_populates="post")
+
+    @property
+    def upvote(self):
+        return sum(1 for vote in self.votes if vote.vote_type == VoteType.UPVOTE)
+    
+    @property
+    def downvote(self):
+        return sum(1 for vote in self.votes if vote.vote_type == VoteType.DOWNVOTE)
+
+    @property
+    def rating(self):
+        return self.upvote - self.downvote
+
+class PostVote(Base):
+    __tablename__ = "post_votes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    vote_type = Column(Enum(VoteType), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    post = relationship("Post", back_populates="votes")
+    user = relationship("User", back_populates="post_votes")
+
+    # Ensure one vote per user per post
+    __table_args__ = (
+        UniqueConstraint('post_id', 'user_id', name='uix_user_post_vote'),
+    )
 
 '''
     from sqlalchemy import (

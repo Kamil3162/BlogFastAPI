@@ -1,4 +1,6 @@
 import enum
+
+
 class BlacklistReason(enum.Enum):
     SPAM = "Spamming or irrelevant messages"
     ABUSE = "Abusive behavior"
@@ -20,3 +22,7 @@ class Categories(enum.Enum):
     AI = "AI"
     NEWS = "NEWS"
     PROGRESS = "PROGRESS"
+
+class VoteType(enum.Enum):
+    UPVOTE = 1
+    DOWNVOTE = -1
