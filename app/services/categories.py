@@ -7,6 +7,7 @@ from ..schemas.category import (
     CategoryScheme
 )
 
+
 class CategoryService:
     @staticmethod
     def get_by_category(db: Session, *categories):
@@ -26,7 +27,6 @@ class CategoryService:
         except exc.SQLAlchemyError as e:
             CustomHTTPExceptions.handle_db_exeception(e)
 
-
     @staticmethod
     def all_categories(db: Session):
         try:
@@ -40,7 +40,7 @@ class CategoryService:
     def check_category_existence(db: Session, category_named):
         try:
             return db.query(PostCategory).filter(
-                   PostCategory.category_name == category_named
+                PostCategory.category_name == category_named
             ).first()
         except exc.SQLAlchemyError as e:
             CustomHTTPExceptions.handle_db_exeception(e)
@@ -86,7 +86,7 @@ class CategoryService:
             category_id,
             db: Session,
             category_data: CategoryScheme
-        ):
+    ):
         category = CategoryService.get_category_by_id(db, category_id)
         category.category_name = category_data.category_name
 

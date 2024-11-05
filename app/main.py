@@ -4,20 +4,18 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
-from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
-# import my packag
-from .auth import auth_utils
-from .core.config import settings
-from .db.session import engine
-from .utils.utils import get_db
+# import my packages
 from .db.init_db import init_db
 from .api.v1.router import api_router
 from .middleware.database import DataBaseErrorMiddleware
 from .middleware.docs import DocsBlockMiddleware
+from .core.handlers.request_handler import setup_exception_handlers
 
 app = FastAPI(docs_url='/docs', redoc_url=None)
+
+setup_exception_handlers(app=app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,7 +35,6 @@ app.add_middleware(DataBaseErrorMiddleware)
 app.include_router(api_router)
 
 env_path = Path(__file__).parent / 'config.env'
-
 load_dotenv(dotenv_path=env_path)
 
 if __name__ == "__main__":

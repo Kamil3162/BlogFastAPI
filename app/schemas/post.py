@@ -1,7 +1,7 @@
 from typing import Optional, List
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from .comment import CommentTemplate
 from .category import CategoryScheme
@@ -55,7 +55,17 @@ class PostResponse:
 
     class Config:
         from_attributes = True
+        arbitrary_types_allowed = True
+
 
 class PostWithComments(BaseModel):
     post: PostResponse
     comments: List[CommentTemplate]
+
+    # Configure Pydantic to work with SQLAlchemy models
+    class Config:
+        from_attribute = True
+        arbitrary_types_allowed = True
+
+
+

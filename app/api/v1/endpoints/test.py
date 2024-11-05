@@ -1,9 +1,13 @@
+import json
 from dotenv import load_dotenv
+
 from fastapi import Request
 from pathlib import Path
 from fastapi.routing import APIRouter
+
 from ....core.config import settings
 from ....api.deps import get_db
+from ....core.handlers.exceptions import ServiceError
 
 router = APIRouter()
 
@@ -16,8 +20,7 @@ async def home():
 
 @router.get('/test-get')
 async def test_req(request: Request):
-    client = request.client.host
-    return {"client:": client}
+    raise ServiceError(name="Service Error")
 
 
 @router.get('/web-chat')

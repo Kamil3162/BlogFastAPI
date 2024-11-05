@@ -54,8 +54,10 @@ async def login_for_access_token(
             )
 
         access_token_expires = timedelta(minutes=160)
-        access_token = USER_AUTH.create_access_token(data={"sub": user.email},
-                                                     expires_delta=access_token_expires)
+        access_token = USER_AUTH.create_access_token(
+            data={"sub": user.email},
+            expires_delta=access_token_expires
+        )
 
         refresh_token_expires = timedelta(days=7)
         refresh_token = USER_AUTH.create_refresh_token(
@@ -79,8 +81,6 @@ async def login_for_access_token(
             max_age=1800,  # Adjust expiration time if needed
             secure=True,
             samesite="None",  # Allow cross-site requests
-
-            # path='/',  # Optionally set path
         )
 
         user_data = {
@@ -101,7 +101,6 @@ async def login_for_access_token(
             max_age=1800,  # Adjust expiration time if needed
             samesite="None",  # Allow cross-site requests
 
-            # path='/',  # Optionally set path
         )
 
         return {
@@ -130,7 +129,7 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/valid/token", response_model=TokenStatus)
-async def token_valid(token_status = Depends(check_token_status)):
+async def token_valid(token_status=Depends(check_token_status)):
     return token_status
 
 @router.post("/token/refresh")

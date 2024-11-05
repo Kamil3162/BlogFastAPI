@@ -1,3 +1,4 @@
+import typing
 from typing import List, Optional
 
 from fastapi import Depends, Query
@@ -15,6 +16,11 @@ from ....api.deps import get_current_active_user
 router = APIRouter()
 
 @router.get("/post/{post_id}/", response_model=PostWithComments)
+async def get_post(post_id: int, db: Session = Depends(get_db)):
+    post = PostService.get_post_with_comments(post_id)
+    return PostWithComments.model_validate(post)
+
+@router.get("/post-test/{post_id}/", response_model=PostRead)
 async def get_post(post_id: int, db: Session = Depends(get_db)):
     post = PostService.get_post_with_comments(post_id)
     return PostWithComments.model_validate(post)
@@ -62,13 +68,32 @@ async def update_post(
     post: PostUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
-):
+) -> typing.Any:
     """
-        Update a post.
+    Update an existing post.
+
+    Args:
+        post_id: The ID of the post to update
+        post: The updated post data
+        db: Database session
+        current_user: The authenticated user
+
+    Returns:
+        PostResponse: The updated post
+
+    Raises:
+        HTTPException:
+            - 404: Post not found
+            - 403: User doesn't have permission to update this post
+            - 401: User is not authenticated
     """
     updated_post = PostService.update_post(post_id, post, db)
     return updated_post
 
+
+# guy from internet handle exception inside endpoints in his fastapi application
+# better solution is handle exceptions inside services because
+# endpoint should be lightweight and i have to concentrate on this thing
 @router.delete("/post-delete/{post_id}/")
 async def delete_post(
     post_id: int,

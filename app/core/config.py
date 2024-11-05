@@ -35,17 +35,14 @@ class BrokerSettings:
         env_file = ".env"
 
 class RedisSettings(BaseSettings):
-    REDIS_HOST: str = "localhost"
-    REDIS_PASSWORD: str = "password"
-    REDIS_HOST: str = "127.0.0.1"
-    REDIS_DB_NAME: str = "redis-handler"
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 0
-    POSTS_PER_PAGE: int = 10
-    STATS_CACHE_SECONDS: int = 300  # 5 minutes
-
-
-
+    host: str = "localhost"
+    password: str = "password"
+    db_name: str = "redis-handler"
+    port: int = 6379
+    db: int = 0
+    per_page: int = 10
+    stats_cache_connection: int = 300  # 5 minutes
+    decode_response: bool = True
 
 settings = Settings()
 settings_redis = RedisSettings()

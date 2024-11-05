@@ -5,7 +5,7 @@ from sqlalchemy import exc
 class CustomHTTPExceptions:
 
     @staticmethod
-    def handle_db_exceptiopn(exception:Exception):
+    def handle_db_exceptiopn(exception: Exception):
         if isinstance(exception, exc.OperationalError):
             status_code = status.HTTP_503_SERVICE_UNAVAILABLE
             error_detail = "A database operational error occurred"

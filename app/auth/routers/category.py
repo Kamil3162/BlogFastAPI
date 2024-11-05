@@ -14,46 +14,48 @@ from BlogFastAPI.app.schemas.category import (
 
 category_router = APIRouter()
 
+
 @category_router.get('/categories')
-async def fetch_all_categories(
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+def fetch_all_categories(
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_db)
 ):
     categories = CategoryService.all_categories(db)
     return categories
 
-@category_router.post('/create-category')
-async def category_create(
-    category_scheme: CategoryScheme,
-    current_user: User = Depends(
-        UserMiddleware.check_permission(UserRoles.MODERATOR)
-    ),
-    db: Session = Depends(get_db)
-):
-    print(category_scheme)
 
+@category_router.post('/create-category')
+def category_create(
+        category_scheme: CategoryScheme,
+        current_user: User = Depends(
+            UserMiddleware.check_permission(UserRoles.MODERATOR)
+        ),
+        db: Session = Depends(get_db)
+):
     category = CategoryService.create_category(db, category_scheme)
     return category
 
+
 @category_router.delete('/delete-category/{category_id}')
-async def category_delete(
-    category_id,
-    current_user: User = Depends(
-        UserMiddleware.check_permission(UserRoles.MODERATOR)
-    ),
-    db: Session = Depends(get_db)
+def category_delete(
+        category_id,
+        current_user: User = Depends(
+            UserMiddleware.check_permission(UserRoles.MODERATOR)
+        ),
+        db: Session = Depends(get_db)
 ):
     operation_result = CategoryService.category_delete(db, category_id)
     return operation_result
 
+
 @category_router.put('/category-update/{category_id}')
-async def category_update(
-    category_id,
-    category_data: CategoryScheme,
-    current_user: User = Depends(
-        UserMiddleware.check_permission(UserRoles.MODERATOR)
-    ),
-    db: Session = Depends(get_db)
+def category_update(
+        category_id,
+        category_data: CategoryScheme,
+        current_user: User = Depends(
+            UserMiddleware.check_permission(UserRoles.MODERATOR)
+        ),
+        db: Session = Depends(get_db)
 ):
     category = CategoryService.category_update(category_id, db, category_data)
     return category

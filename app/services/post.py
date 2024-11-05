@@ -1,176 +1,214 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import exc
+from typing import List, Optional
+
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import (
+    SQLAlchemyError,
+    IntegrityError,
+    OperationalError,
+    DataError,
+    NoResultFound
+)
+
+
+from ..db.repositories.post import PostRepository
 from ..schemas.post import PostCreate, PostRead, PostWithComments
-from ..models.post import Post
-from ..models.user import User
-from ..models.category import PostCategory
-from ..utils.deps import CustomHTTPExceptions
-from ..utils.exceptions import NotFoundError
 from ..services.comment import CommentService
-from ..schemas.comment import CommentTemplate
+from ..exceptions.post import PostNotFound
+from ..models.post import Post
+from ..core.handlers.database_handler import handle_database_error
+
 
 class PostService:
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, db: Session):
+        self._db = db
+        self._repository = PostRepository()
+        self._comment_service = CommentService(db)
 
-    @staticmethod
-    def check_post_existance(db: Session, title=None):
-        try:
-            return db.query(Post).filter(Post.title == title).first() is not None
-        except exc.SQLAlchemyError:
-            raise NotFoundError("Following post doesnt exists")
-
-    @staticmethod
-    def check_user_existance(db: Session, user_id):
-        try:
-            return db.query(User).filter(User.id == user_id).first() is not None
-        except exc.SQLAlchemyError:
-            raise NotFoundError("Following user doesnt exists")
-
-    @staticmethod
-    def create_post(post: PostCreate, user_id, db: Session):
-        try:
-            post_data = post
-            if PostService.check_post_existance(db, post.title):
-                # You can handle this by raising an exception or returning a message
-                return CustomHTTPExceptions.bad_request()
-
-            if PostService.check_user_existance(db, post_data.owner_id):
-                return CustomHTTPExceptions.bad_request(
-                    detail="A post with this title already exists"
-                )
-
-            new_post = Post(
-                title=post_data.title,
-                content=post_data.content,
-                photo_url=post_data.photo_url,
-                owner_id=user_id.id
-            )
-
-            db.add(new_post)
-            db.commit()
-            db.refresh(new_post)
-            return new_post
-
-        except Exception as e:
-            # For example, log the error and/or re-raise the exception
-            db.rollback()
-            raise CustomHTTPExceptions.internal_server_error()
-
-    @staticmethod
-    def update_post(post_id: int, post_data: PostCreate, db: Session) -> PostRead:
+    def get_post_by_id(self, post_id: int) -> PostRead:
         """
-            Function responsible for update post instance
-        :param post_instance:
-        :param post_data:
-        :param db:
-        :return:
+        Get post by ID with error handling
         """
-        post_instance = PostService.get_post(post_id, db)
-        if not post_instance:
-            raise CustomHTTPExceptions.not_found()
-
-        for key, value in post_data.model_dump().items():
-            setattr(post_instance, key, value)
-
-        db.commit()
-        db.refresh(post_instance)
-
-        return PostRead.model_validate(post_instance)
-
-    @staticmethod
-    def delete_post(post_id: int, db: Session):
         try:
-            post_instance = PostService.get_post(db, post_id)
-            if not post_instance:
-                raise CustomHTTPExceptions.not_found()
-
-            db.delete(post_instance)
-            db.commit()
-            return {'status': 'deleted'}
-        except exc.SQLAlchemyError as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
-
-    @staticmethod
-    def get_post(db: Session, post_id: int):
-        try:
-            post = db.query(Post).filter(Post.id == post_id).first()
-            post.views += 1
-            db.commit()
-        except exc.SQLAlchemyError as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
-        else:
-            return post
-
-    @staticmethod
-    def get_posts(db: Session):
-        try:
-            posts = db.query(Post).all()
-        except exc.SQLAlchemyError as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
-        else:
-            return posts
-
-    @staticmethod
-    def get_posts_range(db: Session, page_number=1):
-        try:
-            posts = db.query(Post).limit(10).offset(page_number)
-        except exc.SQLAlchemyError as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
-        else:
-            return posts
-
-    @staticmethod
-    def get_posts_by_category(db: Session, category_name):
-        try:
-            posts = db.query(Post) \
-                .join(Post.categories) \
-                .join(PostCategory) \
-                .filter(PostCategory.category_name == category_name) \
-                .all()
-        except exc.SQLAlchemyError as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
-        else:
-            return posts
-
-    @staticmethod
-    def rate_post(mark, db: Session):
-        pass
-
-    @staticmethod
-    def get_newest_post(db: Session):
-        return db.query(Post).first()
-
-    def get_post_with_comments(self, post_id: int) -> PostWithComments:
-        try:
-            post = self.db.get(Post, post_id)
-
+            post = self._repository.get_by_id(self._db, post_id)
             if not post:
-                raise HTTPException(
-                    status_code=404,
-                    detail="Post not found"
+                raise PostNotFound(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    description="Post not found"
                 )
-
-            comments = CommentService.get_comments_by_post_id(post_id, self.db)
-
-            post_with_comments = PostWithComments(
-                post=post,
-                comments=[
-                        CommentTemplate(
-                            id=comment.id,
-                            content=comment.content,
-                            author=comment.author,
-                            created_at=comment.created_at
-                        )
-                        for comment in comments
-                    ]
+            return PostRead.model_validate(post)
+        except PostNotFound as e:
+            raise HTTPException(
+                status_code=e.status_code,
+                detail=e.description
             )
-
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=str(e)
             )
-        finally:
-            return post_with_comments
+
+    def check_post_existence(self, title: str) -> bool:
+        """
+        Check if post exists by title.
+        Let the global handlers manage the specific database errors.
+        """
+        if not title:
+            raise DataError("Title cannot be empty")
+
+        try:
+            post = self._repository.get_by_title(self._db, title.strip())
+            if not post:
+                raise NoResultFound()
+        except Exception as e:
+            handle_database_error(e)
+
+    def create_post(self, post_data: PostCreate, user_id: int) -> PostRead:
+        """
+        Create new post with validation
+        """
+        try:
+            # Check if post with same title exists
+            if self.check_post_existence(post_data.title):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Post with this title already exists"
+                )
+
+            # Create post
+            post = self._repository.create(
+                self._db,
+                post_data,
+                user_id
+            )
+            return PostRead.model_validate(post)
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
+
+    def update_post(
+            self,
+            post_id: int,
+            post_data: PostCreate,
+            user_id: int
+    ) -> PostRead:
+        """
+        Update post with ownership verification
+        """
+        try:
+            # Get post
+            post = self._repository.get_by_id(self._db, post_id)
+            if not post:
+                raise PostNotFound(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    description="Post not found"
+                )
+
+            # Verify ownership
+            if post.owner_id != user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Not authorized to update this post"
+                )
+
+            # Update post
+            updated_post = self._repository.update(
+                post,
+                post_data,
+                self._db
+            )
+            return PostRead.model_validate(updated_post)
+        except (PostNotFound, HTTPException):
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
+
+    def get_posts_paginated(
+            self,
+            page: int = 1,
+            limit: int = 10
+    ) -> List[PostRead]:
+        """
+        Get paginated posts
+        """
+        try:
+            skip = (page - 1) * limit
+            posts = self._repository.get_posts_range(
+                self._db,
+                skip=skip,
+                limit=limit
+            )
+            return [PostRead.model_validate(post) for post in posts]
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
+
+    def get_posts_by_category(
+            self,
+            category_name: str
+    ) -> List[PostRead]:
+        """
+        Get all posts in a category
+        """
+        try:
+            posts = self._repository.get_by_category(
+                self._db,
+                category_name
+            )
+            return [PostRead.model_validate(post) for post in posts]
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
+
+    def get_post_with_comments(self, post_id: int) -> PostWithComments:
+        """
+        Get post with its comments
+        """
+        try:
+            post = self._repository.get_by_id(self._db, post_id)
+            if not post:
+                raise PostNotFound(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    description="Post not found"
+                )
+
+            comments = self._comment_service.get_comments_by_post_id(post_id)
+
+            return PostWithComments(
+                post=PostRead.model_validate(post),
+                comments=comments
+            )
+        except PostNotFound as e:
+            raise HTTPException(
+                status_code=e.status_code,
+                detail=e.description
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
+
+    def get_newest_post(self) -> Optional[PostRead]:
+        """
+        Get the newest post
+        """
+        try:
+            post = self._repository.get_newest_post(self._db)
+            return PostRead.model_validate(post) if post else None
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )

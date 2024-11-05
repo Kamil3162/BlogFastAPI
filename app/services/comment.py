@@ -1,66 +1,126 @@
+from typing import List
+
+from BlogFastAPI.app.schemas.comment import CommentScheme
 from sqlalchemy.orm import Session
 from sqlalchemy import exc
 from ..schemas.comment import (
     CommentScheme
 )
+from fastapi import HTTPException, status
 from ..models.comment import Comment
-from ..services.post import PostService
 from ..utils.utils import CustomHTTPExceptions
 from ..utils.exceptions import NotFoundError
+from ..db.repositories.post import PostRepository
+from ..db.repositories.comments import CommentRepository
+from ..exceptions.comment import CommentNotFound, PermissionDenied
+
+
 class CommentService:
-    @staticmethod
-    def comment_create(comment_create: CommentScheme, db: Session):
+    def __init__(self, db):
+        self._db = db
+        self._post_repository = PostRepository(self._db)
+        self._comment_repository = CommentRepository(self._db)
+
+    def comment_create(self, comment_create: CommentScheme):
         try:
-            # eventually post title
-            post_id = comment_create.post_id
-
-            if PostService.check_post_existance(db, post_id):
-                return CustomHTTPExceptions.bad_request()
-
-            comment = Comment(
-                post_id=post_id,
-                content=comment_create.content,
-                commentator_id=comment_create.commentator_id
-            )
+            post = PostRepository.get_by_id(self._db, comment_create.post_id)
+            if not post:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Post not found"
+                )
+            comment_dict = comment_create.model_dump()
+            comment = self._comment_repository.create(comment_dict)
+            return comment
         except Exception as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
-        else:
-            db.add(comment)
-            db.commit()
-            db.refresh(comment)
-            return comment
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
 
-    @staticmethod
-    def check_existance(comment_id, db: Session):
+    def comment_update(self, comment: CommentScheme, user_id):
         try:
-            comment = db.query(Comment). \
-                       filter(Comment.id == comment_id).first()
-        except exc.SQLAlchemyError:
-            raise NotFoundError("Following user doesnt exists")
-        else:
-            return comment
+            comment_instance = self._comment_repository.get_by_id(comment.id)
 
-    @staticmethod
-    def comment_update(comment: CommentScheme, db: Session):
-        comment_id = comment.id
-        comment_instance = CommentService.check_existance(comment_id, db)
+            if not comment_instance:
+                raise CommentNotFound(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Comment not found"
+                )
 
-        for key, value in comment.model_dump().items():
-            setattr(comment_instance, key, value)
+            ownership = self._check_comment_ownership(
+                comment_instance.id,
+                user_id
+            )
 
-        db.commit()
-        db.refresh(comment_instance)
+            if not ownership:
+                raise PermissionDenied(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You havent access to change this"
+                )
+            updated_comment = self._comment_repository.update(
+                comment_instance,
+                comment
+            )
+            return CommentScheme.model_validate(updated_comment)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
 
-        return CommentScheme.model_validate(comment_instance)
+    def comment_delete(self, comment_id, user_id):
+        try:
+            comment = self._comment_repository.get_by_id(comment_id)
+            if not comment:
+                raise CommentNotFound(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Comment not found"
+                )
 
-    @staticmethod
-    def comment_delete(comment_id, db: Session):
-        comment_instance = CommentService.check_existance(comment_id, db)
-        db.delete(comment_instance)
-        db.commit()
-        return {'status': 'deleted'}
+            ownership = self._check_comment_ownership(comment_id, user_id)
 
-    @staticmethod
-    def get_comments_by_post_id(post_id, db: Session):
-        comments_instance = db.execute(Comment).where(Comment.post_id == post_id)
-        return comments_instance
+            if not ownership:
+                raise PermissionDenied(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Comment not found"
+                )
+
+            self._comment_repository.delete(comment)
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
+
+    def get_comments_by_post_id(self, post_id) -> list[
+        CommentScheme]:
+        """
+                Get all comments for a specific post
+                """
+        try:
+            comments = self._comment_repository.get_comments_by_post_id(
+                post_id
+            )
+            return [CommentScheme.model_validate(comment) for comment in
+                    comments]
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
+
+    def _check_comment_ownership(
+            self,
+            comment_id: int,
+            user_id: int,
+    ) -> bool:
+        try:
+            comment = self._comment_repository.get_by_id(comment_id)
+            if comment.commentator.id == user_id:
+                return True
+        except Exception as e:
+            raise exc.DatabaseError(
+                f"You havent access to modify this comment: str{e}"
+            )

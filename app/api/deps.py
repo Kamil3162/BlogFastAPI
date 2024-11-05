@@ -25,6 +25,7 @@ def get_db() -> Generator:
 def authenticate_user_from_token(
     db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
 ) -> User:
+    print(token)
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[ALGORITHM]

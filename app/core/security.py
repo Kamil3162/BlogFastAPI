@@ -26,7 +26,6 @@ DB = get_db()
 
 async def check_token_status(
         token: str = Depends(oauth2_scheme),
-        db: Session = Depends(get_db)  # Injecting the database session here
 ):
     try:
         decoded_jwt = decode_jwt(token)
@@ -34,8 +33,6 @@ async def check_token_status(
         return token_data
     except JWTError:
         return TokenStatus(is_valid=False)
-
-
 
 class UserAuth:
     def __init__(self, oauth2_scheme):
@@ -114,8 +111,6 @@ class UserAuth:
 
     def decode_access_token(self, token):
         return jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
-
-
 
 USER_AUTH = UserAuth(oauth2_scheme=oauth2_scheme)
 
