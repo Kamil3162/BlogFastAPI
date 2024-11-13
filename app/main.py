@@ -20,7 +20,6 @@ setup_exception_handlers(app=app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
-    # Adjust this to your React app's origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_origin_regex="https?://.*",
@@ -30,7 +29,7 @@ app.add_middleware(
 )
 
 app.add_middleware(DocsBlockMiddleware)
-app.add_middleware(DataBaseErrorMiddleware)
+# app.add_middleware(DataBaseErrorMiddleware)
 
 app.include_router(api_router)
 

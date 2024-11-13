@@ -14,8 +14,6 @@ class DataBaseErrorMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         try:
             return await call_next(request)
-        except SQLAlchemyError as e:
-            return CustomHTTPExceptions.handle_db_exceptiopn(e)
         except Exception as e:
             return JSONResponse(
                 status_code=500,

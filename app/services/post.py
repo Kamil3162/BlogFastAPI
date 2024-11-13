@@ -16,7 +16,6 @@ from ..schemas.post import PostCreate, PostRead, PostWithComments
 from ..services.comment import CommentService
 from ..exceptions.post import PostNotFound
 from ..models.post import Post
-from ..core.handlers.database_handler import handle_database_error
 
 
 class PostService:
@@ -56,12 +55,10 @@ class PostService:
         if not title:
             raise DataError("Title cannot be empty")
 
-        try:
-            post = self._repository.get_by_title(self._db, title.strip())
-            if not post:
-                raise NoResultFound()
-        except Exception as e:
-            handle_database_error(e)
+        post = self._repository.get_by_title(self._db, title.strip())
+        if not post:
+            raise NoResultFound()
+
 
     def create_post(self, post_data: PostCreate, user_id: int) -> PostRead:
         """

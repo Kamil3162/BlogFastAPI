@@ -1,7 +1,8 @@
 import logging
+import typing
 from typing import Dict, Any, Optional
 from datetime import datetime
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import (
     SQLAlchemyError,
@@ -180,6 +181,21 @@ def setup_exception_handlers(app: FastAPI) -> None:
             }
         )
 
+    @app.exception_handler(Exception)
+    async def exception_error_handler(
+            request: Request,
+            exc: Exception
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={
+                "status": "error",
+                "message": "Unexpected server error",
+                "error_code": "SERVER_ERROR",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        )
+
 
 def _parse_integrity_error(exc: IntegrityError) -> Dict[str, Any]:
     """Parse details from IntegrityError"""
@@ -202,4 +218,3 @@ def _parse_integrity_error(exc: IntegrityError) -> Dict[str, Any]:
         }
 
     return {"type": "unknown_violation"}
-

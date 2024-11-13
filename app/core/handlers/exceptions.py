@@ -28,6 +28,7 @@ class ErrorDetail(BaseModel):
     error_type: Optional[str] = None
     params: Optional[Dict[str, Any]] = None
 
+
 class DatabaseErrorException(HTTPException):
     def __init__(self, status_code, detail, error_type, params):
         super().__init__(
@@ -38,3 +39,4 @@ class DatabaseErrorException(HTTPException):
                 params=params
             ).model_dump(exclude_none=True)
         )
+
