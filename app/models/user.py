@@ -38,6 +38,10 @@ class User(Base):
                f"is_verified={self.is_verified}, created_at={self.created_at}, " \
                f"updated_at={self.updated_at})"
 
+    @property
+    def user_scaled_information(self):
+        return f"{self.first_name} {self.last_name}"
+
 
 class BlacklistedUser(Base):
     __tablename__ = "blacklisted_users"

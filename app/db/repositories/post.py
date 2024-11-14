@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from ...models.post import Post
 from ...models.category import PostCategory
 from ...schemas.post import PostCreate
+
+
 class PostRepository:
     def __init__(self, db: Session):
         self._db = db
@@ -18,9 +20,9 @@ class PostRepository:
 
     def get_by_category(self, db: Session, category_name):
         posts = db.query(Post) \
-                .join(Post.categories) \
-                .join(PostCategory) \
-                .filter(PostCategory.category_name == category_name).all()
+            .join(Post.categories) \
+            .join(PostCategory) \
+            .filter(PostCategory.category_name == category_name).all()
         return posts
 
     def create(self, db: Session, post_data: PostCreate, owner_id: int):
@@ -47,10 +49,15 @@ class PostRepository:
         posts = db.query(Post).all()
         return posts
 
-    def get_posts_range(self, db: Session, skip: int=0, limit: int=10):
+    def get_posts_range(self, db: Session, skip: int = 0, limit: int = 10):
         posts = db.query(Post).offset(skip).limit(limit).all()
         return posts
 
     def get_newest_post(self, db: Session):
         newest_post = db.query(Post).order_by(Post.created_at.desc()).first()
         return newest_post
+
+    def delete_post(self, db: Session, post_id):
+        query_delete = db.delete(Post).where(Post.id == post_id)
+        result = db.execute(query_delete)
+        return result.rowcount > 0

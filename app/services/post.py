@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from BlogFastAPI.app.schemas.user import UserResponse
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import (
@@ -10,9 +11,9 @@ from sqlalchemy.exc import (
     NoResultFound
 )
 
-
 from ..db.repositories.post import PostRepository
-from ..schemas.post import PostCreate, PostRead, PostWithComments
+from ..schemas.post import PostCreate, PostRead, PostWithComments, PostDelete, \
+    PostShortInfo
 from ..services.comment import CommentService
 from ..exceptions.post import PostNotFound
 from ..models.post import Post
@@ -58,7 +59,6 @@ class PostService:
         post = self._repository.get_by_title(self._db, title.strip())
         if not post:
             raise NoResultFound()
-
 
     def create_post(self, post_data: PostCreate, user_id: int) -> PostRead:
         """
@@ -209,3 +209,59 @@ class PostService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=str(e)
             )
+
+    def delete_post(self, post_id):
+        """
+            Delete post using post_id
+        """
+        was_deleted = self._repository.delete_post(self._db, post_id)
+
+        if not was_deleted:
+            raise PostNotFound(f"Post with id:{post_id} not found")
+
+        self._db.commit()
+
+        return PostDelete(
+            id=post_id,
+            description=f"Post {post_id} successfully deleted"
+        )
+
+    def get_post_list(self, page: int, limit: int):
+        try:
+            skip = (page - 1) * limit
+            posts = self._repository.get_posts_range(
+                self._db,
+                skip=skip,
+                limit=limit
+            )
+            return [
+                PostShortInfo(
+                    id=post.id,
+                    title=post.title,
+                    created_at=post.created_at,
+                    owner=UserResponse(
+                        id=post.owner.id,
+                        username=post.owner.username,
+                    )
+                )
+                for post in posts
+            ]
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
+
+
+    # implement options trending posts algorith based on views/votes/comments
+    # email verification
+    # password reset
+    # user blacklist
+
+    """
+        Popular posts
+        User sessions
+        View counts
+        Vote counts
+        Comment counts
+    """

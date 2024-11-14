@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 def setup_exception_handlers(app: FastAPI) -> None:
     """Configure all exception handlers for the FastAPI application"""
+    print("execute setup exception handler")
 
     @app.exception_handler(ServiceError)
     async def service_error_handler(
@@ -195,6 +196,22 @@ def setup_exception_handlers(app: FastAPI) -> None:
                 "timestamp": datetime.utcnow().isoformat()
             }
         )
+
+    # @app.exception_handler(TypeError)
+    # async def exception_type_handler(
+    #     request: Request,
+    #     exc: Exception
+    # ) -> JSONResponse:
+    #     return JSONResponse(
+    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         content={
+    #             "status": "error",
+    #             "message": "Unexpected interval server error",
+    #             "error_code": "SERVER_ERROR",
+    #             "timestamp": datetime.utcnow().isoformat()
+    #         }
+    #     )
+
 
 
 def _parse_integrity_error(exc: IntegrityError) -> Dict[str, Any]:

@@ -12,10 +12,13 @@ from .api.v1.router import api_router
 from .middleware.database import DataBaseErrorMiddleware
 from .middleware.docs import DocsBlockMiddleware
 from .core.handlers.request_handler import setup_exception_handlers
+from .core.handlers.req_handler import setup_server_exc_handler
 
 app = FastAPI(docs_url='/docs', redoc_url=None)
 
 setup_exception_handlers(app=app)
+setup_server_exc_handler(app=app)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,7 +31,7 @@ app.add_middleware(
         "Access-Control-Allow-Origin", "Set-Cookie"],
 )
 
-app.add_middleware(DocsBlockMiddleware)
+# app.add_middleware(DocsBlockMiddleware)
 # app.add_middleware(DataBaseErrorMiddleware)
 
 app.include_router(api_router)

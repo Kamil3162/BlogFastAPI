@@ -63,5 +63,8 @@ async def get_admin_user(
     self, current_user: Annotated[User, Depends(authenticate_user_from_token)]
 ):
     if current_user.role != UserRoles.ADMIN.value:
-        raise HTTPException(status_code=401, detail="You havent permission to change and check this data")
+        raise HTTPException(
+            status_code=401,
+            detail="You havent permission to change and check this data"
+        )
     return current_user

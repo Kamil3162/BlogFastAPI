@@ -19,6 +19,7 @@ from ..core.enums import UserRoles
 from ..utils.deps import CustomHTTPExceptions
 
 from ..schemas.token import TokenData, TokenStatus
+
 config_file = Path(__file__).parent.parent / 'config.env'
 load_dotenv(config_file)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')

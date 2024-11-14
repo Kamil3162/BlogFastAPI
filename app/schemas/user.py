@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 
 from ..core.enums import UserRoles
-
+from ..core.enums import BlacklistReason
 
 T = TypeVar('T')
 
@@ -53,10 +53,10 @@ class BlacklistedUserSchema(BaseModel):
     id: int
     user_id: int
     blocked_date: datetime
-    reason: str
+    reason: Optional[BlacklistReason]
 
-    class Config:
-        from_attributes = True
+    # class Config:
+    #     from_attributes = True
 
 class RequestUserCreate(BaseModel):
     parameters: UserCreate = Field(...)

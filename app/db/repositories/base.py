@@ -14,7 +14,6 @@ class BaseRepository:
         self.model = model
         self.db = db
 
-
     def get_by_id(self, id: int):
         '''
         Retrieve a record by its ID.

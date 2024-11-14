@@ -9,8 +9,6 @@ class DocsBlockMiddleware(BaseHTTPMiddleware):
 
         device_type = request.headers.get('Device-Type')
 
-        print(**request)
-
         allowed_token = "secret_token"
         request_token = request.query_params.get("token")
 

@@ -45,7 +45,7 @@ class PostStats(BaseModel):
     downvotes: int
 
 
-class PostResponse:
+class PostResponse(BaseModel):
     id: int
     title: str
     content: str
@@ -67,5 +67,15 @@ class PostWithComments(BaseModel):
         from_attribute = True
         arbitrary_types_allowed = True
 
+
+class PostDelete(BaseModel):
+    id: int
+    description: str
+
+
+class PostShortInfo(BaseModel):
+    id: int
+    title: str
+    owner: UserResponse
 
 

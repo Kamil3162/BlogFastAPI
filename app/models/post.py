@@ -66,6 +66,20 @@ class PostVote(Base):
         UniqueConstraint('post_id', 'user_id', name='uix_user_post_vote'),
     )
 
+
+class PostView(Base):
+    __tablename__ = "post_views"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"))
+    viewer_ip = Column(String)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    viewed_at = Column(DateTime(timezone=True), default=datetime.utcnow())
+
+    post = relationship("Post", back_populates="views_detail")
+
+
+
 '''
     from sqlalchemy import (
     Boolean,

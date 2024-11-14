@@ -18,3 +18,4 @@ class UserMiddleware:
             return current_user
         return check_user_permission
 
+

@@ -30,26 +30,16 @@ async def get_post(post_id: int, db: Session = Depends(get_db)):
 async def get_posts(
     page: int = Query(1, gt=0),
     q: Optional[str] = None,
-    current_user: User = Depends(get_current_active_user),
+    # current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
 
-    all_posts = PostService.get_posts_range(db, page)
+    all_posts = PostService.get_posts_paginated(page=page, limit=10)
     return all_posts
-
-@router.get("/posts/statistic", response_model=List[PostRead])
-async def fetch_post_data(
-    page: int = Query(1, gt=0),
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
-):
-    posts = db.query(Post).limit(20).offset(page)
-    for post in posts:
-        print(post)
 
 @router.get("/newest-post")
 async def get_newest_post(db: Session = Depends(get_db)):
-    post = PostService.get_newest_post(db)
+    post = PostService.get_newest_post()
     return post
 
 @router.post("/post-create/")
@@ -59,7 +49,7 @@ async def create_post(
     current_user: User = Depends(get_current_active_user)
 ):
     user = UserService.get_user_by_id(db, post.owner_id)
-    created_post = PostService.create_post(post, db, user)
+    created_post = PostService.create_post(post, user)
     return created_post
 
 @router.put("/post-update/{post_id}/")
@@ -90,17 +80,19 @@ async def update_post(
     updated_post = PostService.update_post(post_id, post, db)
     return updated_post
 
+@router.get("/post-list")
+async def post_list(
+    page: int = Query(1, gt=0)
+):
+    pass
 
-# guy from internet handle exception inside endpoints in his fastapi application
-# better solution is handle exceptions inside services because
-# endpoint should be lightweight and i have to concentrate on this thing
 @router.delete("/post-delete/{post_id}/")
 async def delete_post(
     post_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    delete_status = PostService.delete_post(post_id, db)
+    delete_status = PostService.delete_post(post_id=post_id)
     return delete_status
 
 

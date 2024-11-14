@@ -2,6 +2,8 @@ from typing import Optional, Dict, Any
 
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
+
+
 class BaseException(Exception):
     """
         Base exception for handle other exceptions

@@ -7,3 +7,8 @@ __pycache__/
 ### FastAPI ###
 *.pyc
 __pycache__/
+
+
+# idea
+
+.idea
