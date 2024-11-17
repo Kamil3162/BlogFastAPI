@@ -1,4 +1,4 @@
-from sqlalchemy import exc
+from sqlalchemy import exc, desc
 from sqlalchemy.orm import Session
 
 from ...models.post import Post
@@ -14,8 +14,8 @@ class PostRepository:
         post = db.query(Post).filter(Post.id == post_id).first()
         return post
 
-    def get_by_title(self, db: Session, title: str):
-        post = db.query(Post).filter(Post.title == title).first()
+    def get_by_title(self, db: Session, title: str) -> Post:
+        post = db.query(Post).filter(Post.title.ilike(f'%{title}%')).first()
         return post
 
     def get_by_category(self, db: Session, category_name):
@@ -54,10 +54,9 @@ class PostRepository:
         return posts
 
     def get_newest_post(self, db: Session):
-        newest_post = db.query(Post).order_by(Post.created_at.desc()).first()
+        newest_post = db.query(Post).order_by(desc(Post.created_at).first())
         return newest_post
 
-    def delete_post(self, db: Session, post_id):
-        query_delete = db.delete(Post).where(Post.id == post_id)
-        result = db.execute(query_delete)
-        return result.rowcount > 0
+    def delete_post(self, db:Session, post_id):
+        result = self._db.query(Post).filter(Post.id == post_id).delete()
+        return bool(result)

@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from BlogFastAPI.app.schemas.user import UserSchemeOfficial, UserUpdate, UserRoleScheme
-from BlogFastAPI.app.core.security import USER_AUTH, oauth2_scheme
-from BlogFastAPI.app.core.enums import UserRoles
-from BlogFastAPI.app.models.models import User
+from ...schemas.user import UserSchemeOfficial, UserUpdate, UserRoleScheme
+from ...core.security import USER_AUTH, oauth2_scheme
+from ...core.enums import UserRoles
+from ...models.user import User
 from ...middleware.role import UserMiddleware
 from ...services.users import UserService
 from ...utils.utils import get_db
@@ -61,3 +61,4 @@ async def users(
 ):
     users = UserService.get_all_users(db)
     return users
+

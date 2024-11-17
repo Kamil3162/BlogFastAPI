@@ -8,12 +8,13 @@ from sqlalchemy.orm import Session
 from ....utils.utils import get_db
 from ....schemas.post import PostCreate, PostRead, PostUpdate, PostWithComments
 from ....models.user import User
-from ....models.post import Post
 from ....services.post import PostService
 from ....services.users import UserService
 from ....api.deps import get_current_active_user
 
 router = APIRouter()
+db = get_db()
+post_service = PostService(db=db)
 
 @router.get("/post/{post_id}/", response_model=PostWithComments)
 async def get_post(post_id: int, db: Session = Depends(get_db)):
@@ -39,7 +40,7 @@ async def get_posts(
 
 @router.get("/newest-post")
 async def get_newest_post(db: Session = Depends(get_db)):
-    post = PostService.get_newest_post()
+    post = post_service.get_newest_post()
     return post
 
 @router.post("/post-create/")

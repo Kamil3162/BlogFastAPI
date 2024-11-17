@@ -16,6 +16,7 @@ from sqlalchemy.sql import func
 from ..db.session import Base
 from ..core.enums import BlacklistReason, UserRoles
 from ..core.enums import VoteType
+
 class Post(Base):
     __tablename__ = 'posts'
 
@@ -29,11 +30,12 @@ class Post(Base):
 
     owner_id = Column(Integer, ForeignKey('users.id'))
 
-    categories = relationship("PostCategories", back_populates="post")
+    # categories = relationship("PostCategory", back_populates="post")
     owner = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="post")
-    sections = relationship("Section", back_populates="post")
+    # sections = relationship("Section", back_populates="post")
     votes = relationship("PostVote", back_populates="post")
+    views_detail = relationship("PostView", back_populates="post")
 
     @property
     def upvote(self):

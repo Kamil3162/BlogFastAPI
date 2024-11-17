@@ -20,3 +20,8 @@ class CommentTemplate(BaseModel):
     commentator_id: int
     post_id: int
     created_at: datetime
+
+class CommentBaseScheme(BaseModel):
+    id: int
+    post_id: int
+    commentator_id: int

@@ -30,6 +30,7 @@ class UserSchemeOfficial(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
+    hashed_password: str
     is_active: bool
 
     class Config:

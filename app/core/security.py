@@ -64,6 +64,7 @@ class UserAuth:
         user = self.get_user(email=email, db=db)
         print(user)
         print(self.verify_password(password, user.hashed_password))
+        print("exec ")
         if not user:
             return False
         if not self.verify_password(password, user.hashed_password):
@@ -71,14 +72,23 @@ class UserAuth:
             return False
         return user
 
-    def create_access_token(self, data: dict, expires_delta: Optional[datetime.timedelta] = None):
+    def create_access_token(
+            self,
+            data: dict,
+            expires_delta: Optional[datetime.timedelta] = None
+    ):
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.datetime.utcnow() + expires_delta  # Use UTC time
         else:
             expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=150)  # Use UTC time
+
         to_encode.update({"exp": expire.timestamp()})  # Convert datetime to timestamp
-        encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+        encoded_jwt = jwt.encode(
+            to_encode,
+            self.SECRET_KEY,
+            algorithm=self.ALGORITHM
+        )
         return encoded_jwt
 
     def create_refresh_token(

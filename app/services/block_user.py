@@ -5,11 +5,13 @@ from sqlalchemy.exc import IntegrityError, DataError
 from fastapi import status
 from fastapi.responses import HTMLResponse
 
-from ..db.repositories.user import UserRepository, UserDoesntExists
-from ..core.enums import BlacklistReason
-from ..db.repositories.user import BlackUserRepository
-from ..schemas.user import BlacklistedUserSchema, Response
+from ..db.repositories.user import UserRepository
+from ..db.repositories.block_user import BlackUserRepository
+from ..schemas.user import BlacklistedUserSchema
 from ..models.user import BlacklistedUser
+from ..exceptions.user import UserDoesntExists
+
+
 class BlockUserService:
     def __init__(self, db: Session):
         self._db = db
@@ -54,7 +56,7 @@ class BlockUserService:
                 f"You cant delete user with id:{user_id}, it doesnt exists"
             )
 
-        result = self._repository.delete_black_flag(user_id)
+        result = self._repository.del_black_flag(user_id)
 
         if result:
             return HTMLResponse(

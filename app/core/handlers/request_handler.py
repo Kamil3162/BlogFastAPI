@@ -11,7 +11,8 @@ from sqlalchemy.exc import (
     DataError,
     DatabaseError,
     ProgrammingError,
-    NoResultFound
+    NoResultFound,
+    InvalidRequestError
 )
 from .exceptions import ServiceError
 
@@ -182,6 +183,21 @@ def setup_exception_handlers(app: FastAPI) -> None:
             }
         )
 
+    # @app.exception_handler(InvalidRequestError)
+    # async def invalid_request_error_handler(
+    #         request: Request,
+    #         exc: InvalidRequestError
+    # ) -> JSONResponse:
+    #     return JSONResponse(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         content={
+    #             "status": "error",
+    #             "message": f"{exc.__cause__}",
+    #             "error_code": "REQUEST_ERROR",
+    #             "timestamp": datetime.utcnow().isoformat()
+    #         }
+    #     )
+
     @app.exception_handler(Exception)
     async def exception_error_handler(
             request: Request,
@@ -196,6 +212,8 @@ def setup_exception_handlers(app: FastAPI) -> None:
                 "timestamp": datetime.utcnow().isoformat()
             }
         )
+
+
 
     # @app.exception_handler(TypeError)
     # async def exception_type_handler(

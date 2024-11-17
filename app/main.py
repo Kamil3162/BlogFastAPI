@@ -14,7 +14,12 @@ from .middleware.docs import DocsBlockMiddleware
 from .core.handlers.request_handler import setup_exception_handlers
 from .core.handlers.req_handler import setup_server_exc_handler
 
+
 app = FastAPI(docs_url='/docs', redoc_url=None)
+
+@app.on_event("startup")
+async def startup():
+    init_db()
 
 setup_exception_handlers(app=app)
 setup_server_exc_handler(app=app)
@@ -41,4 +46,3 @@ load_dotenv(dotenv_path=env_path)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=7000)
-    init_db()

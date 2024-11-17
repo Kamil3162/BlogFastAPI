@@ -22,8 +22,8 @@ from ..models.post import Post
 class PostService:
     def __init__(self, db: Session):
         self._db = db
-        self._repository = PostRepository()
-        self._comment_service = CommentService(db)
+        self._repository = PostRepository(self._db)
+        self._comment_service = CommentService(self._db)
 
     def get_post_by_id(self, post_id: int) -> PostRead:
         """

@@ -79,3 +79,13 @@ async def users(
 ):
     users = UserService.get_all_users(db)
     return users
+
+
+@router.get("/mock")
+async def users_mock(
+    # user_role: Annotated[User,
+    # Depends(UserMiddleware.check_permission(role=UserRoles.ADMIN))],
+    db: Session = Depends(get_db)
+):
+    users = UserService.get_all_users(db)
+    return users

@@ -102,11 +102,13 @@ async def login_for_access_token(
             samesite="None",  # Allow cross-site requests
 
         )
+        print(access_token)
 
         return {
             "access_token": access_token,
             "token_type": "bearer",
         }
+
     except Exception as e:
         # Return a custom error response
         return {

@@ -6,6 +6,7 @@ from ..core.config import settings
 
 def init_db() -> None:
     # Create all tables
+    print("create db")
     Base.metadata.create_all(bind=engine)
 
 

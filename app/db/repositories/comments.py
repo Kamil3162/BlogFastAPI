@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import exc
 
 from ...models.comment import Comment
+from ...schemas.comment import CommentBaseScheme
+
 
 class CommentRepository:
 
@@ -33,14 +35,15 @@ class CommentRepository:
         comment.updated_at = datetime.datetime.utcnow()
         return comment
 
-    def delete(self, comment: Comment) -> None:
-        """Delete a comment"""
-        self._db.delete(comment)
-        self._db.commit()
+    def delete(self, comment_data: CommentBaseScheme) -> bool:
+        """
+            Delete a comment
+        """
+        result = self._db.query(Comment). \
+            filter(Comment.id == comment_data.id).delete()
+        return bool(result)
 
     def get_comments_by_post_id(self, post_id: int) -> List[Comment]:
-        return self._db.query(Comment)\
-            .filter(Comment.post_id == post_id)\
+        return self._db.query(Comment) \
+            .filter(Comment.post_id == post_id) \
             .all()
-
-

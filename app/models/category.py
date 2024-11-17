@@ -13,10 +13,11 @@ from sqlalchemy.sql import func
 
 from ..db.session import Base
 from ..core.enums import BlacklistReason, UserRoles
+
 class PostCategory(Base):
     __tablename__ = "categories"
 
     id = Column(Integer, primary_key=True, index=True)
     category_name = Column(String)
 
-    posts = relationship("PostCategories", back_populates="category")
+    # posts = relationship("Post", back_populates="category")

@@ -31,6 +31,7 @@ class User(Base):
     blacklisted_users = relationship("BlacklistedUser",
                                      back_populates="user",
                                      uselist=False)
+    post_votes = relationship("PostVote", back_populates="user")
 
     def __str__(self):
         return f"User(id={self.id}, email='{self.email}', first_name='{self.first_name}', " \

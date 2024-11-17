@@ -8,11 +8,17 @@ from ..core.security import USER_AUTH
 from ..utils.deps import CustomHTTPExceptions
 from ..core.enums import UserRoles
 from ..schemas.user import UserSchemeOfficial
+from ..db.repositories.user import UserRepository
 class UserService:
+    def __init__(self, db):
+        self._db = db
+        self._user_repository = UserRepository(self._db)
 
     @staticmethod
     def create_user(db: Session, user):
         # test does it work properly and rolled back
+        # self._user_repository.get_user(user)
+
         db_user = db.query(User).filter(User.email == user.email).first()
         if db_user:
             return None  # User already exists
