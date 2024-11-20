@@ -1,96 +1,90 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import exc
+
 from ..models.post import Post
 from ..utils.deps import CustomHTTPExceptions
 from ..models.category import PostCategory
 from ..schemas.category import (
     CategoryScheme
 )
-
+from ..db.repositories.categories import CategoryRepository
+from ..schemas.category import CategoryObject
 
 class CategoryService:
-    @staticmethod
-    def get_by_category(db: Session, *categories):
-        try:
-            posts = db.query(Post).filter(Post.category.in_(categories))
-        except exc.SQLAlchemyError as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
-        else:
-            return posts
+    def __init__(self, db: Session):
+        self._db = db
+        self.model = PostCategory
+        self._repository = CategoryRepository(self._db)
 
-    @staticmethod
-    def get_category_by_id(db: Session, category_id):
-        try:
-            return db.query(PostCategory).filter(
-                PostCategory.id == category_id
-            ).first()
-        except exc.SQLAlchemyError as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
+    def get_posts_by_category(self, category_data: CategoryObject):
+        posts = self._db.query(Post) \
+                 .filter(Post.category.category_name == category_data.category_name)
 
-    @staticmethod
-    def all_categories(db: Session):
+        if not posts:
+            raise Exception("No posts with following category name")
+
+        return posts
+
+    def get_category_by_id(self, category_id):
+        category = self._repository.get_by_id(category_id)
+
+        if not category:
+            raise Exception("following Category doesnt exsists")
+
+        return category
+
+    def all_categories(self):
         try:
-            categories = db.query(PostCategory).all()
+            categories = self._repository.get_all_categories()
         except exc.SQLAlchemyError as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
+            CustomHTTPExceptions.handle_db_exceptiopn(e)
         else:
             return categories
 
-    @staticmethod
-    def check_category_existence(db: Session, category_named):
-        try:
-            return db.query(PostCategory).filter(
-                PostCategory.category_name == category_named
-            ).first()
-        except exc.SQLAlchemyError as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
-            return False
-
-    @staticmethod
-    def create_category(db: Session, category_scheme: CategoryScheme):
+    def create_category(self, category_scheme: CategoryScheme):
         try:
             category_name = category_scheme.category_name
-            category = CategoryService.check_category_existence(
-                db, category_name
-            )
+            category = self._repository.get_category_by_name(category_name)
 
             if category:
                 return False
             category_created = PostCategory(category_name=category_name)
 
-            db.add(category_created)
-            db.commit()
+            self._db.add(category_created)
+            self._db.commit()
         except Exception as e:
-            CustomHTTPExceptions.handle_db_exeception(e)
+            CustomHTTPExceptions.handle_db_exceptiopn(e)
         else:
             return category_created
 
-    @staticmethod
-    def category_delete(db: Session, category_id):
+    def category_delete(self, category_id):
         try:
-            category = CategoryService.get_category_by_id(db, category_id)
+            category = self._repository.get_by_id(category_id)
             if not category:
                 return False
 
-            db.delete(category)
-            db.commit()
-
+            self._db.delete(category)
+            self._db.commit()
             return True
+
         except exc.SQLAlchemyError as e:
-            db.rollback()
-            CustomHTTPExceptions.handle_db_exeception(e)
+            self._db.rollback()
+            CustomHTTPExceptions.handle_db_exceptiopn(e)
             return False
 
-    @staticmethod
     def category_update(
-            category_id,
-            db: Session,
-            category_data: CategoryScheme
-    ):
-        category = CategoryService.get_category_by_id(db, category_id)
+            self,
+            category_data: CategoryObject
+    ) -> CategoryObject:
+        category = self._repository.get_by_id(category_data.id)
         category.category_name = category_data.category_name
 
-        db.commit()
-        db.refresh(category)
+        self._db.commit()
+        self._db.refresh(category)
 
-        return category
+        category_scheme = CategoryObject(
+            id=category.id,
+            category_name=category.category_name
+        )
+
+        return category_scheme

@@ -30,17 +30,17 @@ class UserRepository:
         result = self._db.execute(query)
         return result.scalar_one_or_none()
 
-    def get_by_id(self, id: int):
+    def get_by_id(self, user_id: int):
         """
                 Get a user by email address.
 
                 Args:
-                    email: User's email address
+                    user_id: User ID in DB
 
                 Returns:
                     Optional[User]: User object if found, None otherwise
                 """
-        query = select(self.model).where(self.model.id == id)
+        query = select(self.model).where(self.model.id == user_id)
         result = self._db.execute(query)
         return result.scalar_one_or_none()
 
@@ -49,7 +49,7 @@ class UserRepository:
             Create a new user with ahshed password
 
             Args:
-                user_data: UserCreate schema with user information
+                user_data: UserCreate used to create a new user
 
             Returns:
                 User: Created user object
@@ -84,7 +84,7 @@ class UserRepository:
         """
         user_obj = self.get_by_id(user_id)
 
-        update_data = dict(user_data)
+        update_data = user_data.model_dump(exclude_unset=True)
 
         if "password" in update_data:
             update_data["password"] = self._user_manager.get_hash_password(
@@ -143,12 +143,12 @@ class UserRepository:
         return result.scalars().all()
 
     def delete_user(self, user_id):
+        user = self.get_by_id(user_id)
+
+        if not user:
+            return False
+
         result = self._db.execute(
-            delete(User).where(User.id == user_id)
+            delete(self.model).where(User.id == user_id)
         )
         return result.rowcount
-
-    def get_user(self, user_id: int):
-        user = self._db.query(User) \
-                   .filter(User.id == user_id).first() is not None
-        return user

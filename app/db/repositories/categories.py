@@ -1,15 +1,25 @@
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
-from base import BaseRepository
-from ...models.category import PostCategory
 from sqlalchemy import select, func
 
+from ...schemas.category import CategoryObject
+from ...models.category import PostCategory
 
-class CategoryRepository(BaseRepository):
+
+class CategoryRepository:
     def __init__(self, db: Session):
         self._db = db
-        self._model = PostCategory
+        self.model = PostCategory
+
+    def get_by_id(self, category_id):
+        category = self._db.query(self.model) \
+                    .where(self.model.id == category_id)
+
+        if not category:
+            return False
+
+        return category
 
     def get_post_categories(
             self,
@@ -86,3 +96,30 @@ class CategoryRepository(BaseRepository):
         self._db.refresh(category)
 
         return category
+
+    def update_category(
+        self,
+        category_name: str,
+        exists_category: CategoryObject
+    ) -> PostCategory:
+        category = self._db.query(PostCategory) \
+               .filter(PostCategory.id == exists_category.id) \
+               .first()
+
+        self._db.commit()
+        return category
+
+    def delete(self, id: int) -> bool:
+        category_obj = self.get_by_id(id=id)
+
+        if not category_obj:
+            return False
+
+        result = self._db.delete(category_obj)
+        self._db.commit()
+
+        return True
+
+    def get_all_categories(self):
+        categories = self._db.query(PostCategory).all()
+        return categories

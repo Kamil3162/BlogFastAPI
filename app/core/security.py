@@ -10,15 +10,11 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException
 from fastapi import Depends
 from jose import jwt, JWTError, exceptions
-from sqlalchemy.orm import Session
 
 from ..models.user import User
-from ..api.deps import authenticate_user_from_token
 from ..utils.utils import get_db, decode_jwt
 from ..core.enums import UserRoles
-from ..utils.deps import CustomHTTPExceptions
-
-from ..schemas.token import TokenData, TokenStatus
+from ..schemas.token import TokenStatus
 
 config_file = Path(__file__).parent.parent / 'config.env'
 load_dotenv(config_file)
@@ -49,22 +45,24 @@ class UserAuth:
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_user(self, email: str, db):
+        users = db.query(User).all()
+        print(len(users))
         user = db.query(User).filter(User.email == email).first()
         if user is None:
             return False
         return user
 
     def check_user_admin_permission(self, email: str, db):
+        print(email)
         user = db.query(User).filter(User.email == email).first()
+        print(user)
         if user.role is UserRoles.ADMIN.value:
             return False
         return user
 
     def authenticate_user(self, db, email: str, password: str):
         user = self.get_user(email=email, db=db)
-        print(user)
         print(self.verify_password(password, user.hashed_password))
-        print("exec ")
         if not user:
             return False
         if not self.verify_password(password, user.hashed_password):

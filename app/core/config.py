@@ -4,6 +4,8 @@ from pathlib import Path
 from pydantic_settings import BaseSettings
 
 env_path1 = Path(__file__).parent.parent / 'config.env'
+SECRET_KEY = os.getenv("SECRET_KEY")
+
 load_dotenv(dotenv_path=env_path1)
 
 class Settings:

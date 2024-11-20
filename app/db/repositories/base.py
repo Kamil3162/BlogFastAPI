@@ -1,10 +1,9 @@
-
 import typing
 
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm import Session
-import sqlalchemy
 from pydantic import BaseModel
+import sqlalchemy
 
 
 ModelType = typing.TypeVar("ModelType", bound=DeclarativeMeta)

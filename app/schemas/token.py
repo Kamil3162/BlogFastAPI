@@ -8,7 +8,8 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    email: Union[EmailStr, None] = None
+    sub: str
+    exp: str
 
 class TokenStatus(BaseModel):
     is_valid: bool

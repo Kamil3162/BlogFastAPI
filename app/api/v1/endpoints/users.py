@@ -74,7 +74,7 @@ async def get_user_role(
 @router.get("/users")
 async def users(
     user_role: Annotated[User,
-    Depends(UserMiddleware.check_permission(roles=UserRoles.ADMIN))],
+    Depends(UserMiddleware.check_permission(role=UserRoles.MODERATOR))],
     db: Session = Depends(get_db)
 ):
     users = UserService.get_all_users(db)

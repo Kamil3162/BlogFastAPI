@@ -19,7 +19,7 @@ class BlockUserService:
         self._user_repository = UserRepository
 
     def change_user_status(self, user_data: BlacklistedUserSchema):
-        obj_user = self._user_repository.get_user(user_data.id)
+        obj_user = self._user_repository.get_by_id(user_data.id)
 
         if not obj_user:
             raise UserDoesntExists(

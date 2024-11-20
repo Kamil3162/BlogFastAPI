@@ -20,4 +20,19 @@ class PostCategory(Base):
     id = Column(Integer, primary_key=True, index=True)
     category_name = Column(String)
 
-    # posts = relationship("Post", back_populates="category")
+    post_categories = relationship(
+        "PostCategories",
+        back_populates="category"
+    )
+
+class PostCategories(Base):
+    __tablename__ = "posts_categories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"))
+    category_id = Column(Integer, ForeignKey("categories.id"))
+
+    post = relationship("Post", back_populates="post_categories")
+    category = relationship(
+        "PostCategory",
+        back_populates="post_categories")

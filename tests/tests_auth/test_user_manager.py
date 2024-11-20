@@ -68,7 +68,7 @@ def test_get_user(user_manager, db_session):
     db_session.add(user_test_db)
     db_session.commit()
 
-    db_found_user = user_manager.get_user(
+    db_found_user = user_manager(
         user_test_db.email,
         db_session
     )
