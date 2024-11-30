@@ -18,7 +18,7 @@ class PostCategory(Base):
     __tablename__ = "categories"
 
     id = Column(Integer, primary_key=True, index=True)
-    category_name = Column(String)
+    category_name = Column(String, unique=True, nullable=False)
 
     post_categories = relationship(
         "PostCategories",

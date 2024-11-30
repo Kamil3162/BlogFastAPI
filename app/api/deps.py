@@ -11,11 +11,16 @@ from ..db.session import SessionLocal
 from ..models.user import User
 from ..schemas.token import TokenData
 from ..core.security import USER_AUTH
+from ..core.config import RedisSettings
+from ..core.enums import UserRoles
 from ..utils.utils import get_db
 from ..services.categories import CategoryService
 from ..services.users import UserService
 from ..services.post import PostService
 from ..services.base import ServiceFactory
+from ..services.comment import CommentService
+from ..services.blacklist_token import BlackListTokenService
+from ..db.base import RedisClient
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl='token'
@@ -90,3 +95,16 @@ def get_user_service(
     db: Session = Depends(get_db)
 ):
     return ServiceFactory.get_instance(UserService, db)
+
+def get_comment_service(
+    db: Session = Depends(get_db)
+):
+    return ServiceFactory.get_instance(CommentService, db)
+
+def get_redis_service():
+    return ServiceFactory.get_redis_instance(RedisClient)
+
+def get_blacklisttoken_service(
+    redis = Depends(get_redis_service)
+):
+    return ServiceFactory.get_instance(redis)

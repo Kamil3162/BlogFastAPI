@@ -1,3 +1,4 @@
+import datetime
 import json
 from typing import Annotated
 from datetime import timedelta
@@ -27,6 +28,8 @@ from ....schemas.user import UserCreate
 from ....services.users import UserService
 from ....utils.deps import CustomHTTPExceptions
 from ....services.email import EmailService
+from ...deps import get_user_service, get_blacklisttoken_service
+from jose import JWTError, ExpiredSignatureError
 
 router = APIRouter()
 
@@ -102,7 +105,6 @@ async def login_for_access_token(
             samesite="None",  # Allow cross-site requests
 
         )
-        print(access_token)
 
         return {
             "access_token": access_token,
@@ -129,23 +131,12 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
     return db_user
 
-
-@router.get("/valid/token", response_model=TokenStatus)
-async def token_valid(token_status=Depends(check_token_status)):
-    return token_status
-
-@router.post("/token/refresh")
-async def token_refresh():...
-
 @router.post("/password/reset")
 async def password_reset(
     email: str,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db)
 ):
-    user = UserService.get_user_by_email(email, db)
-    if not user:
-        raise CustomHTTPExceptions.not_found(f"User with email:{email} not found")
 
     reset_token = USER_AUTH.create_reset_password_token(email)
     reset_url = f"https://www.kamildev.pl/reset/password/{reset_token}/"
@@ -153,14 +144,17 @@ async def password_reset(
     background_tasks.add_task(EmailService.send_reset_email, email, reset_url)
 
     return {
-        "message": "If a user with that email exists, a password reset link has been sent."}
+        "message":
+            "If a user with that email exists,"
+            " a password reset link has been sent."
+    }
 
 @router.put("/password/reset/{token}")
 async def set_new_password(
     token: str,
     password_data:
     ResetTokenSchemas,
-    db: Session = Depends(get_db)
+    user_service: UserService = Depends(get_user_service)
 ):
     try:
         if password_data.password != password_data.confim_password:
@@ -170,39 +164,106 @@ async def set_new_password(
 
         username = decoded_token.get("sub")
 
-        user = UserService.set_new_password(username, db, password_data)
+        user = user_service.set_new_password(username, password_data)
         return {"message": "proper change password", "code": "200"}
     except HTTPException:
         raise HTTPException(status_code=404, detail="Problem with form")
 
-@router.get('/logout')
+@router.post('/logout')
 async def logout(
     response: Response,
     access_token: str = Cookie(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # redis_service = Depends(get_blacklisttoken_service)
 ):
-    # code responsible for delete cookies from browser
-    response.delete_cookie('access_token')
-    response.delete_cookie('refresh_token')
+    try:
+        if not access_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not authenticated"
+            )
 
-    return {'logout': 'success'}
+        # code responsible for delete cookies from browser
+        response.delete_cookie(
+            key='access_token',
+            secure=True,
+            httponly=True,
+            samesite='lax'
+        )
 
+        response.delete_cookie(
+            key='refresh_token',
+            secure=True,
+            httponly=True,
+            samesite='lax'
+        )
+
+        # Add security headers
+        response.headers['Clear-Site-Data'] = '"cookies", "storage"'
+        response.headers['Cache-Control'] = 'no-store'
+
+        return {
+            'status': 'success',
+            'message': 'Successfully logged out'
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
 
 @router.get("/validate")
-async def validate_token(access_token: str = Cookie(None)):
-    if access_token is None:
-        return {"authenticated": False}
+async def validate_token(
+    access_token: str = Cookie(None),
+    user_service: UserService = Depends(get_user_service),
+    db: Session = Depends(get_db)
+):
+    print(access_token)
+
+    if not access_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
 
     try:
         # Assuming USER_AUTH.decode_access_token() is a method you've defined
         # to decode and validate your JWT token.
         decoded_token = USER_AUTH.decode_access_token(access_token)
 
-        # If everything is fine, return the authenticated user's information.
+        print(dict(decoded_token))
+
+        exp = decoded_token.get('exp')
+
+        if not exp or datetime.datetime.utcnow().timestamp() > exp:
+            raise ExpiredSignatureError("Token has expired")
+
+        user_email = decoded_token.get('sub')
+        user = user_service.get_user_by_email(user_email, db)
+
+        if not user or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found or inactive"
+            )
+
         return {"authenticated": True,
-                "user": "User information based on decoded token"}
+                "user": {
+                    "user_id": user.id,
+                    "user_email": user.email,
+                    "user_role": user.role
+                }
+        }
+
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token format"
+        )
+
     except Exception as e:  # You might want to catch more specific exceptions
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise HTTPException(status_code=401, detail=f"{str(e)}")
 
 
 @router.get('/test')

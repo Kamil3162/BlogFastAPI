@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 from .comment import CommentTemplate
 from .category import CategoryScheme
 from .user import UserResponse
-
+from ..core.enums import VoteType
 
 class PostCreate(BaseModel):
     title: str
@@ -27,6 +27,7 @@ class PostRead(BaseModel):
 
 
 class PostUpdate(BaseModel):
+    id: int
     title: Optional[str] = None
     content: Optional[str] = None
 
@@ -78,4 +79,20 @@ class PostShortInfo(BaseModel):
     title: str
     owner: UserResponse
 
+# Post view Schemes
+class PostViewResponse(BaseModel):
+    post_id: int
+    view_count: int
 
+
+# Post vote Schemes
+
+class PostVoteResponse(BaseModel):
+    post_id: int
+    vote_up: int
+    vote_down: int
+
+class PostVoteCreate(BaseModel):
+    post_id: int
+    user_id: int
+    vote_type: VoteType

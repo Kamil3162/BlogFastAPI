@@ -24,6 +24,15 @@ class ServiceFactory:
         return cls._instances[service_class]
 
     @classmethod
+    def get_redis_instance(
+        cls,
+        service_class: Type[ServiceType],
+    ) -> ServiceType:
+        if service_class not in cls._instances:
+            cls._instances[service_class] = service_class()
+        return cls._instances[service_class]
+
+    @classmethod
     def swap_instance(
         cls,
         service_class: Type[ServiceType],

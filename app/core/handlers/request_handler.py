@@ -43,6 +43,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         """
             Handle database integrity errors (unique constraints, foreign keys)
         """
+        print("run integrity error")
 
         error_detail = _parse_integrity_error(exc)
 

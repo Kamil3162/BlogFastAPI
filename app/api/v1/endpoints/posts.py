@@ -10,6 +10,7 @@ from ....schemas.post import PostCreate, PostRead, PostUpdate, PostWithComments
 from ....models.user import User
 from ....services.post import PostService
 from ....services.users import UserService
+from ....schemas.category import CategoryObject
 from ....api.deps import get_current_active_user, get_post_service
 
 router = APIRouter()
@@ -37,12 +38,13 @@ async def get_post(
 @router.get("/posts", response_model=List[PostRead])
 async def get_posts(
     page: int = Query(1, gt=0),
-    q: Optional[str] = None,
+    post_service: PostService = Depends(get_post_service),
+        q: Optional[str] = None,
     # current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
 
-    all_posts = PostService.get_posts_paginated(page=page, limit=10)
+    all_posts = post_service.get_posts_paginated(page=page, limit=10)
     return all_posts
 
 @router.get("/newest-post")
@@ -54,26 +56,26 @@ async def get_newest_post(
 
 @router.post("/post-create/")
 async def create_post(
-    post: PostCreate,
+    post_data: PostCreate,
+    category_data: CategoryObject,
     service: PostService = Depends(get_post_service),
     # current_user: User = Depends(get_current_active_user)
 ):
-    created_post = service.create_post(post, 10)
+    created_post = service.create_post(post_data, category_data)
     return created_post
 
-@router.put("/post-update/{post_id}/")
+@router.put("/post-update/")
 async def update_post(
-    post_id: int,
-    post: PostUpdate,
+    post_data: PostUpdate,
     service: PostService = Depends(get_post_service),
-    current_user: User = Depends(get_current_active_user)
+    # current_user: User = Depends(get_current_active_user)
 ) -> typing.Any:
+
     """
     Update an existing post.
 
     Args:
-        post_id: The ID of the post to update
-        post: The updated post data
+        post_data: Data scheme for update post
         service: Service class with all possible operations on post data
         current_user: The authenticated user
 
@@ -86,8 +88,9 @@ async def update_post(
             - 403: User doesn't have permission to update this post
             - 401: User is not authenticated
     """
-    user_id = current_user.id
-    updated_post = service.update_post(post_id, post, user_id)
+    user_id = 1
+
+    updated_post = service.update_post(post_data, user_id)
     return updated_post
 
 @router.get("/post-list")
@@ -101,7 +104,7 @@ async def post_list(
 async def delete_post(
     post_id: int,
     post_service: PostService = Depends(get_post_service),
-    current_user: User = Depends(get_current_active_user)
+    # current_user: User = Depends(get_current_active_user)
 ):
     delete_status = post_service.delete_post(post_id)
     return delete_status

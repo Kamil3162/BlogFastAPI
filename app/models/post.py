@@ -74,7 +74,7 @@ class PostView(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     post_id = Column(Integer, ForeignKey("posts.id"))
-    viewer_ip = Column(String)
+    viewer_ip = Column(String, nullable=True, default="127.0.0.1")
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     viewed_at = Column(DateTime(timezone=True), default=datetime.utcnow())
 

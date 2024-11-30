@@ -3,6 +3,9 @@
 __pycache__/
 *.py[cod]
 
+# Alembic migrations
+
+#/alembic/versions
 
 ### FastAPI ###
 *.pyc

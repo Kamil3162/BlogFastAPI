@@ -1,8 +1,11 @@
 from typing import Optional
-from redis import Redis
+from redis import Redis, ConnectionPool
 from contextlib import contextmanager
+
+from ..core.config import RedisSettings, settings_redis
+
 class RedisClient:
-    def __init__(self, config: RedisSettings):
+    def __init__(self, config: RedisSettings = settings_redis):
         self._config = config
         self._client = self._create_connection()
 
@@ -25,12 +28,12 @@ class RedisClient:
         return self._client.delete(key)
 
 class RedisPoolClient:
-    def __init__(self, config: RedisConfig, max_connections: int = 10):
+    def __init__(self, config: RedisSettings, max_connections: int = 10):
         self._config = config
         self._pool = self._create_pool(max_connections)
 
-    def _create_pool(self, max_connections: int) -> redis.ConnectionPool:
-        return redis.ConnectionPool(
+    def _create_pool(self, RedisSettings: int) -> ConnectionPool:
+        return ConnectionPool(
             host=self._config.host,
             port=self._config.port,
             password=self._config.password,

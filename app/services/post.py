@@ -8,15 +8,21 @@ from sqlalchemy.exc import (
     IntegrityError,
     OperationalError,
     DataError,
-    NoResultFound
+    NoResultFound,
+    DatabaseError
 )
 
 from ..db.repositories.post import PostRepository
-from ..schemas.post import PostCreate, PostRead, PostWithComments, PostDelete, \
-    PostShortInfo
+from ..schemas.post import PostCreate, PostRead, PostWithComments, PostDelete,\
+    PostShortInfo, PostUpdate
+from ..schemas.category import CategoryObject
 from ..services.comment import CommentService
+from ..services.categories import CategoryService
+from ..services.users import UserService
 from ..exceptions.post import PostNotFound
-from ..models.post import Post
+from ..db.repositories.posts_categories import PostsCategoriesRepository
+from ..models.post import Post, PostView, PostVote
+from ..core.enums import VoteType
 
 
 class PostService:
@@ -24,6 +30,7 @@ class PostService:
         self._db = db
         self._repository = PostRepository(self._db)
         self._comment_service = CommentService(self._db)
+        self._category_service = CategoryService(self._db)
 
     def get_post_by_id(self, post_id: int) -> PostRead:
         """
@@ -57,14 +64,27 @@ class PostService:
             raise DataError("Title cannot be empty")
 
         post = self._repository.get_by_title(self._db, title.strip())
-        if not post:
-            raise NoResultFound()
 
-    def create_post(self, post_data: PostCreate, user_id: int) -> PostRead:
+        if not post:
+            return False
+        else:
+            return True
+
+    def create_post(
+        self,
+        post_data: PostCreate,
+        category_data: CategoryObject,
+    ) -> PostRead:
         """
         Create new post with validation
         """
         try:
+            category = self._category_service.get_category_by_id(
+                category_id=category_data.id
+            )
+
+            print("test")
+
             # Check if post with same title exists
             if self.check_post_existence(post_data.title):
                 raise HTTPException(
@@ -72,25 +92,25 @@ class PostService:
                     detail="Post with this title already exists"
                 )
 
+            print("exec create")
             # Create post
             post = self._repository.create(
                 self._db,
                 post_data,
-                user_id
             )
+
             return PostRead.model_validate(post)
-        except HTTPException:
-            raise
+        # except HTTPException:
+        #     raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=str(e)
+                detail=f"{str(e)}"
             )
 
     def update_post(
             self,
-            post_id: int,
-            post_data: PostCreate,
+            post_data: PostUpdate,
             user_id: int
     ) -> PostRead:
         """
@@ -98,7 +118,10 @@ class PostService:
         """
         try:
             # Get post
+            post_id = post_data.id
+
             post = self._repository.get_by_id(self._db, post_id)
+
             if not post:
                 raise PostNotFound(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -106,7 +129,7 @@ class PostService:
                 )
 
             # Verify ownership
-            if post.owner_id != user_id:
+            if post.owner_id is not user_id:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Not authorized to update this post"
@@ -116,8 +139,8 @@ class PostService:
             updated_post = self._repository.update(
                 post,
                 post_data,
-                self._db
             )
+
             return PostRead.model_validate(updated_post)
         except (PostNotFound, HTTPException):
             raise
@@ -174,6 +197,7 @@ class PostService:
         """
         try:
             post = self._repository.get_by_id(self._db, post_id)
+
             if not post:
                 raise PostNotFound(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -210,21 +234,25 @@ class PostService:
                 detail=str(e)
             )
 
-    def delete_post(self, post_id):
+    def delete_post(self, post_id: int):
         """
             Delete post using post_id
         """
-        was_deleted = self._repository.delete_post(self._db, post_id)
+        try:
+            was_deleted = self._repository.delete_post(post_id)
 
-        if not was_deleted:
-            raise PostNotFound(f"Post with id:{post_id} not found")
+            if not was_deleted:
+                raise PostNotFound(f"Post with id:{post_id} not found")
 
-        self._db.commit()
+            self._db.commit()
 
-        return PostDelete(
-            id=post_id,
-            description=f"Post {post_id} successfully deleted"
-        )
+            return PostDelete(
+                id=post_id,
+                description=f"Post {post_id} successfully deleted"
+            )
+        except SQLAlchemyError as e:
+            self._db.rollback()
+            raise DatabaseError(f"Database error: {str(e)}")
 
     def get_post_list(self, page: int, limit: int):
         try:
@@ -252,16 +280,67 @@ class PostService:
                 detail=str(e)
             )
 
+class PostVoteService:
+    def __init__(self, db: Session):
+        self._db = db
+        self._post_service = PostService(self._db)
+        self._user_service = UserService(self._db)
+        self._post_repository = PostRepository(self._db)
 
-    # implement options trending posts algorith based on views/votes/comments
-    # email verification
-    # password reset
-    # user blacklist
+    def post_vote_operation(self, user, post_data, vote_type: VoteType):
+        user = self._user_service.get_user_by_id(user.id)
+        post = self._post_service.get_post_by_id(post_data.id)
 
-    """
-        Popular posts
-        User sessions
-        View counts
-        Vote counts
-        Comment counts
-    """
+        post_vote = self._post_service._repository.get_vote_instance(
+            user_id=user.id,
+            post_id=post.id,
+            vote_type=vote_type
+        )
+
+        if not post_vote:
+            vote = self._post_repository.upvote_create(
+                user_id=user.id,
+                post_id=post_data.id,
+                vote_type=vote_type
+            )
+
+            return True
+
+        vote = self.post_vote_update(user.id, post_vote, vote_type=vote_type)
+
+        return True
+
+    def post_vote_update(
+        self,
+        user_id,
+        post_vote: PostVote,
+        vote_type: VoteType
+    ):
+        vote_instance = self._post_repository.upvote_update(
+            post_id=post_vote.post_id,
+            user_id=user_id,
+            vote_type=vote_type
+        )
+
+        return vote_instance
+
+class PostViewService:
+    def __init__(self, db: Session):
+        self._db = db
+        self._post_service = PostService(self._db)
+        self._user_repository = UserService(self._db)
+        self._repository = PostsCategoriesRepository(self._db)
+        self._post_repository = PostRepository(self._db)
+
+    def post_upview(self, user_id, post_id, user_ip: str = ""):
+        user = self._user_repository.get_user_by_id(user_id)
+        post = self._post_service.get_post_by_id(post_id)
+
+        post_view = self._post_repository.create_post_view(
+            user_id=user.id,
+            post_id=post_id.id
+        )
+
+        return True
+
+

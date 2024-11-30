@@ -1,6 +1,7 @@
 from typing import List
 
 from sqlalchemy.orm import Session
+from fastapi import status, HTTPException
 
 from ..schemas.token import ResetTokenSchemas
 from ..models.user import User, BlacklistedUser
@@ -9,6 +10,7 @@ from ..utils.deps import CustomHTTPExceptions
 from ..core.enums import UserRoles
 from ..schemas.user import UserSchemeOfficial
 from ..db.repositories.user import UserRepository
+from ..exceptions.user import UserDoesntExists
 class UserService:
     def __init__(self, db):
         self._db = db
@@ -33,15 +35,14 @@ class UserService:
         db.refresh(db_user)
         return db_user
 
-    @staticmethod
-    def update_user(db: Session, user, user_id):
+    def update_user(self, user, user_id):
         # test update user
-        db_user = UserService.get_user_by_id(db, user_id)
+        db_user = UserService.get_user_by_id(self._db, user_id)
 
         for key, value in user.items():
             if hasattr(db_user, key):
                 setattr(db_user, key, value)
-        db.commit()
+        self._db.commit()
 
         return db_user
 
@@ -52,14 +53,21 @@ class UserService:
             page*10, (page+1)*10).all()
         return blacklisted_users
 
-    @staticmethod
-    def get_user_by_id(db: Session, user_id):
+    def get_user_by_id(self, user_id):
         try:
-            user = db.query(User).filter(User.id == user_id).first()
-        except Exception as e:
-            CustomHTTPExceptions.handle_db_exeception(exception=e)
-        else:
+            user = self._db.query(User).filter(User.id == user_id).first()
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="User doesnt exists"
+                )
+
             return user
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=e
+            )
 
     @staticmethod
     def check_post_create_permission(db: Session, user_id):
@@ -77,9 +85,8 @@ class UserService:
         valid_roles = [role.value for role in UserRoles]
         return user.role in valid_roles
 
-    @staticmethod
-    def get_all_users(db: Session) -> List[UserSchemeOfficial]:
-        db_users = db.query(User).all()
+    def get_all_users(self) -> List[UserSchemeOfficial]:
+        db_users = self._db.query(User).all()
         return [UserSchemeOfficial.model_validate(user) for user in db_users]
 
     @staticmethod
@@ -87,11 +94,10 @@ class UserService:
         db_user = db.query(User).filter(User.email == email_user).first()
         return db_user
 
-    @staticmethod
-    def set_new_password(email, db, password_data: ResetTokenSchemas):
-        db_user = UserService.get_user_by_email(email, db)
+    def set_new_password(self, email, password_data: ResetTokenSchemas):
+        db_user = UserService.get_user_by_email(email, self._db)
         hashed_password = USER_AUTH.get_hash_password(password_data.password)
 
         db_user.password = hashed_password
 
-        db.commit()
+        self._db.commit()

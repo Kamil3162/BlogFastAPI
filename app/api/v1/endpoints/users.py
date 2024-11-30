@@ -11,6 +11,7 @@ from ....models.user import User
 from ....middleware.role import UserMiddleware
 from ....services.users import UserService
 from ....utils.utils import get_db
+from ...deps import get_user_service
 
 router = APIRouter()
 
@@ -32,9 +33,9 @@ async def read_users_me(current_user: User = CommonDeps):
 async def get_user(
         user_id: int,
         current_user: User = CommonDeps,
-        db: Session = DBDeps
+        user_service: UserService = Depends(get_user_service)
 ):
-    user = UserService.get_user_by_id(db, user_id)
+    user = user_service.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -45,17 +46,17 @@ async def update_user(
         user_id: int,
         user_data: UserUpdate,
         current_user: User = CommonDeps,
-        db: Session = DBDeps
+        user_service: UserService = Depends(get_user_service)
 ):
     if current_user.id != user_id and current_user.role != UserRoles.ADMIN:
         raise HTTPException(status_code=403,
                             detail="Not authorized to update this user")
 
-    user = UserService.get_user_by_id(db, user_id)
+    user = user_service.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    updated_user = UserService.update_user(db, user_id, user_data)
+    updated_user = user_service.update_user(user_id, user_data)
     return updated_user
 
 
@@ -63,9 +64,9 @@ async def update_user(
 async def get_user_role(
         user_id: int,
         current_user: User = AdminDeps,
-        db: Session = DBDeps
+        user_service: UserService = Depends(get_user_service)
 ):
-    user = UserService.get_user_by_id(db, user_id)
+    user = user_service.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -73,19 +74,19 @@ async def get_user_role(
 
 @router.get("/users")
 async def users(
-    user_role: Annotated[User,
-    Depends(UserMiddleware.check_permission(role=UserRoles.MODERATOR))],
-    db: Session = Depends(get_db)
+    # user_role: Annotated[User,
+    # Depends(UserMiddleware.check_permission(role=UserRoles.MODERATOR))],
+    user_service: UserService = Depends(get_user_service)
 ):
-    users = UserService.get_all_users(db)
+    users = user_service.get_all_users()
     return users
 
 
 @router.get("/mock")
 async def users_mock(
     # user_role: Annotated[User,
-    # Depends(UserMiddleware.check_permission(role=UserRoles.ADMIN))],
-    db: Session = Depends(get_db)
+    # Depends(UserMiddleware.check_permission(role=UserRoles.MODERATOR))],
+    user_service: UserService = Depends(get_user_service)
 ):
-    users = UserService.get_all_users(db)
+    users = user_service.get_all_users()
     return users

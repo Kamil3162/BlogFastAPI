@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 
 from ...schemas.category import CategoryObject
 from ...models.category import PostCategory
@@ -84,10 +84,7 @@ class CategoryRepository:
             self,
             category_name: str
     ) -> Optional[PostCategory]:
-        """Create a new category if it doesn't exist"""
-        existing = self.get_category_by_name(category_name)
-        if existing:
-            return None
+        """Create a new category"""
 
         category = PostCategory(category_name=category_name)
 
@@ -99,27 +96,43 @@ class CategoryRepository:
 
     def update_category(
         self,
-        category_name: str,
-        exists_category: CategoryObject
+        category_id: int,
+        category_data: CategoryObject
     ) -> PostCategory:
-        category = self._db.query(PostCategory) \
-               .filter(PostCategory.id == exists_category.id) \
-               .first()
 
-        self._db.commit()
-        return category
+        category_obj = self.get_by_id(category_id)
+        result = self._db.execute(category_obj)
+        category = result.scalar_one_or_none()
 
-    def delete(self, id: int) -> bool:
-        category_obj = self.get_by_id(id=id)
-
-        if not category_obj:
+        if not result:
             return False
 
-        result = self._db.delete(category_obj)
+        category.category_name = category_data.category_name
+
+        self._db.commit()
+        self._db.refresh(category)
+
+        return category
+
+    def delete_category(self, category_id: int) -> bool:
+        category_obj = self.get_by_id(category_id)
+        result = self._db.execute(category_obj)
+        category = result.scalar_one_or_none()
+
+        print(category)
+
+        if not category:
+            return False
+
+        self._db.delete(category)
         self._db.commit()
 
-        return True
+        return category
 
     def get_all_categories(self):
         categories = self._db.query(PostCategory).all()
+        # result = self._db.execute(categories)
+        #
+        # self._db.commit()
+
         return categories

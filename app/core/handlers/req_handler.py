@@ -11,13 +11,17 @@ def setup_server_exc_handler(app: FastAPI):
         request: Request,
         exc: HTTPException
     ) -> JSONResponse:
+        print(exc)
+        print(exc.status_code)
+
         return JSONResponse(
             status_code=exc.status_code,
             content={
                 "status": "error",
                 "detail": exc.detail,
                 "error_code": f"HTTP_{exc.status_code}",
-                "timestamp": datetime.datetime.utcnow().isoformat()
+                "timestamp": datetime.datetime.utcnow().isoformat(),
+                "test": "test msg"
             }
         )
 
