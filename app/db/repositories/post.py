@@ -76,7 +76,7 @@ class PostRepository:
         return posts
 
     def get_posts_range(self, db: Session, skip: int = 0, limit: int = 10):
-        posts = db.query(Post).offset(skip).limit(limit).all()
+        posts = db.query(self._model).offset(skip).limit(limit).all()
         return posts
 
     def get_newest_post(self, db: Session):

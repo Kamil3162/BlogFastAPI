@@ -44,15 +44,15 @@ class PostsCategoriesService:
 
     def assign_category_to_post(
             self,
-            post: Post,
-            category: PostCategory
+            post_id: int,
+            category_id: int
     ) -> CategoryPostObject:
         """
         Assign a category to a post.
 
         Args:
-            post: Post instance
-            category: Category instance
+            post_id: Post ID
+            category_id: Category ID
 
         Returns:
             CategoryResponse: Assigned category data
@@ -64,16 +64,17 @@ class PostsCategoriesService:
         try:
             # Check if already assigned
             existing = self._repository.filter_assigned_categories_to_post(
-                post=post,
-                category=category
+                post_id=post_id,
+                category_id=category_id
             )
 
+
             if existing:
-                raise CategoryAlreadyAssignedError(post.id, category.id)
+                raise CategoryAlreadyAssignedError(post_id, category_id)
 
             result = self._repository.assign_category_to_post(
-                post=post,
-                category=category
+                post_id=post_id,
+                category_id=category_id
             )
 
             return CategoryPostObject.model_validate(result)

@@ -20,6 +20,8 @@ class CategoryPostObject(BaseModel):
     post_id: int
     category_id: int
 
+    class Config:
+        from_attributes = True
 
 class CategoriesPostsObject(CategoryPostObject):
     post_id: int

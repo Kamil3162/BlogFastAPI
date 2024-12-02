@@ -19,6 +19,7 @@ from ..schemas.category import CategoryObject
 from ..services.comment import CommentService
 from ..services.categories import CategoryService
 from ..services.users import UserService
+from ..services.posts_categories import PostsCategoriesService
 from ..exceptions.post import PostNotFound
 from ..db.repositories.posts_categories import PostsCategoriesRepository
 from ..models.post import Post, PostView, PostVote
@@ -31,6 +32,7 @@ class PostService:
         self._repository = PostRepository(self._db)
         self._comment_service = CommentService(self._db)
         self._category_service = CategoryService(self._db)
+        self._posts_categories = PostsCategoriesService(self._db)
 
     def get_post_by_id(self, post_id: int) -> PostRead:
         """
@@ -83,8 +85,6 @@ class PostService:
                 category_id=category_data.id
             )
 
-            print("test")
-
             # Check if post with same title exists
             if self.check_post_existence(post_data.title):
                 raise HTTPException(
@@ -92,11 +92,13 @@ class PostService:
                     detail="Post with this title already exists"
                 )
 
-            print("exec create")
             # Create post
             post = self._repository.create(
-                self._db,
                 post_data,
+            )
+
+            self._posts_categories.assign_category_to_post(
+                post.id, category_data.id
             )
 
             return PostRead.model_validate(post)
@@ -262,14 +264,18 @@ class PostService:
                 skip=skip,
                 limit=limit
             )
+            print(posts[0].owner.email)
+
             return [
                 PostShortInfo(
                     id=post.id,
                     title=post.title,
-                    created_at=post.created_at,
                     owner=UserResponse(
                         id=post.owner.id,
-                        username=post.owner.username,
+                        email=post.owner.email,
+                        first_name=post.owner.first_name,
+                        last_name=post.owner.last_name,
+                        is_active=post.owner.is_active
                     )
                 )
                 for post in posts
@@ -342,5 +348,3 @@ class PostViewService:
         )
 
         return True
-
-
