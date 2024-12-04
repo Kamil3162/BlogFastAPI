@@ -73,8 +73,8 @@ async def login_for_access_token(
             httponly=True,
             max_age=1800,  # Adjust expiration time if needed
             secure=True,
-            samesite="None",  # Allow cross-site requests
-            # path='/',  # Optionally set path
+           #samesite="Lax",  # Allow cross-site requests
+            path='/',  # Optionally set path
         )
 
         response.set_cookie(
@@ -83,7 +83,7 @@ async def login_for_access_token(
             httponly=True,
             max_age=1800,  # Adjust expiration time if needed
             secure=True,
-            samesite="None",  # Allow cross-site requests
+            #samesite="Lax",  # Allow cross-site requests
         )
 
         user_data = {
@@ -99,10 +99,10 @@ async def login_for_access_token(
         response.set_cookie(
             key="user_data",
             value=user_data_json,
-            httponly=False,  # Adjust as needed
+            httponly=True,  # Adjust as needed
             secure=True,
             max_age=1800,  # Adjust expiration time if needed
-            samesite="None",  # Allow cross-site requests
+            #samesite="Lax",  # Allow cross-site requests
 
         )
 

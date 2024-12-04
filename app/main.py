@@ -30,7 +30,7 @@ app.add_middleware(
     allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_origin_regex="https?://.*",
+    #allow_origin_regex="https?://.*",
     allow_headers=[
         "Access-Control-Allow-Headers","Content-Type", "Authorization",
         "Access-Control-Allow-Origin", "Set-Cookie"],
@@ -45,4 +45,4 @@ env_path = Path(__file__).parent / 'config.env'
 load_dotenv(dotenv_path=env_path)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=7000)
+    uvicorn.run(app, host="127.0.0.1", port=10000)
