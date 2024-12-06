@@ -77,6 +77,8 @@ class PostDelete(BaseModel):
 class PostShortInfo(BaseModel):
     id: int
     title: str
+    content: str
+    category: str = "Default"
     owner: UserResponse
 
 # Post view Schemes

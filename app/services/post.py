@@ -15,7 +15,7 @@ from sqlalchemy.exc import (
 from ..db.repositories.post import PostRepository
 from ..schemas.post import PostCreate, PostRead, PostWithComments, PostDelete,\
     PostShortInfo, PostUpdate
-from ..schemas.category import CategoryObject
+from ..schemas.category import CategoryObject, CategoryScheme
 from ..services.comment import CommentService
 from ..services.categories import CategoryService
 from ..services.users import UserService
@@ -167,6 +167,7 @@ class PostService:
                 skip=skip,
                 limit=limit
             )
+            print(posts[0])
             return [PostRead.model_validate(post) for post in posts]
         except Exception as e:
             raise HTTPException(
@@ -264,12 +265,17 @@ class PostService:
                 skip=skip,
                 limit=limit
             )
-            print(posts[0].owner.email)
-
+            """
+                #category=CategoryScheme(
+                    #    category_name=post.post_categories[
+                   #         0].category.category_name if post.post_categories else ""
+                   # ),
+            """
             return [
                 PostShortInfo(
                     id=post.id,
                     title=post.title,
+                    content=post.content,
                     owner=UserResponse(
                         id=post.owner.id,
                         email=post.owner.email,
