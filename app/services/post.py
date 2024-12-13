@@ -199,7 +199,8 @@ class PostService:
         Get post with its comments
         """
         try:
-            post = self._repository.get_by_id(self._db, post_id)
+            post = self._repository.get_by_id(post_id)
+            print(post)
 
             if not post:
                 raise PostNotFound(

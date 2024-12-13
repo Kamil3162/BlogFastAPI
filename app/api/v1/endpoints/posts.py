@@ -22,14 +22,15 @@ async def get_post(
     post_id: int,
     post_service: PostService = Depends(get_post_service)
 ):
-    post = PostService.get_post_with_comments(post_id)
+    print(post_id)
+    post = post_service.get_post_with_comments(post_id)
     return PostWithComments.model_validate(post)
 
 @router.get("/post-test/{post_id}/", response_model=PostRead)
 async def get_post(
     post_id: int,
     post_service: PostService = Depends(get_post_service),
-    current_user: User = Depends(get_current_active_user)
+    # current_user: User = Depends(get_current_active_user)
 ):
     post = post_service.get_post_with_comments(post_id)
     return PostWithComments.model_validate(post)
@@ -93,11 +94,12 @@ async def update_post(
     updated_post = service.update_post(post_data, user_id)
     return updated_post
 
-@router.get("/post-list")
+@router.get("/post-list/")
 async def post_list(
     page: int = Query(1, gt=0),
     post_service: PostService = Depends(get_post_service),
 ):
+    print(page)
     return post_service.get_post_list(page=page, limit=10)
 
 @router.delete("/post-delete/{post_id}/")

@@ -11,7 +11,7 @@ class PostRepository:
         self._db = db
         self._model = Post
 
-    def get_by_id(self, db: Session, post_id: int):
+    def get_by_id(self, post_id: int):
         stmt = select(self._model).where(self._model.id == post_id)
         result = self._db.execute(stmt)
         modern_way = result.scalar_one_or_none()

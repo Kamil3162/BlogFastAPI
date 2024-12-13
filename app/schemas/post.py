@@ -54,13 +54,14 @@ class PostResponse(BaseModel):
     created_at: datetime
     stats: PostStats
 
+
     class Config:
         from_attributes = True
         arbitrary_types_allowed = True
 
 
 class PostWithComments(BaseModel):
-    post: PostResponse
+    post: PostRead
     comments: List[CommentTemplate]
 
     # Configure Pydantic to work with SQLAlchemy models

@@ -33,7 +33,8 @@ app.add_middleware(
     #allow_origin_regex="https?://.*",
     allow_headers=[
         "Access-Control-Allow-Headers","Content-Type", "Authorization",
-        "Access-Control-Allow-Origin", "Set-Cookie"],
+        # "Access-Control-Allow-Origin", "Set-Cookie"
+    ],
 )
 
 # app.add_middleware(DocsBlockMiddleware)
