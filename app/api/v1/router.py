@@ -6,7 +6,8 @@ from .endpoints import (
     posts,
     comments,
     category,
-    test
+    test,
+    ws
 )
 
 
@@ -22,3 +23,4 @@ api_router.include_router(category.router,
                           prefix="/categories",
                           tags=["categories"])
 api_router.include_router(test.router, prefix="/test", tags=["test"])
+api_router.include_router(ws.router, prefix="/ws", tags=["ws"])

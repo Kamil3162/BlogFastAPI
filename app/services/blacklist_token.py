@@ -2,10 +2,10 @@ import datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from ..db.base import RedisClient
+from ..db.base import RedisConnectionClient
 
 class BlackListTokenService:
-    def __init__(self, redis_client: RedisClient):
+    def __init__(self, redis_client: RedisConnectionClient):
         self._redis = redis_client
         self.blacklist_timeout = 20 * 60
 

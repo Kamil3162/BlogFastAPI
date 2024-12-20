@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 from ..core.config import RedisSettings, settings_redis
 
-class RedisClient:
+class RedisConnectionClient:
     def __init__(self, config: RedisSettings = settings_redis):
         self._config = config
         self._client = self._create_connection()
@@ -13,13 +13,25 @@ class RedisClient:
         return Redis(
             host=self._config.host,
             port=self._config.port,
-            password=self._config.password,
-            db=self._config.db_name,
             decode_responses=self._config.decode_responses,
         )
 
-    def get(self, key: str) -> Optional[str]:
-        return self._client.get(key)
+    def store_message(self, user_id: str, room_id: str, message_data: dict):
+        pass
+
+    def store_message_test(self):
+        # Method 3: Multiple fields at once
+        self._client.hset("32", mapping={
+            "field1": "value1",
+            "field2": "value2"
+        })
+
+    def get(self):
+        self._client.ping()
+        self._client.hset("32", mapping={
+            "field1": "value1",
+            "field2": "value2"
+        })
 
     def set(self, key: str, value: str, expiration: Optional[int] = None) -> bool:
         return self._client.set(key, value, ex=expiration)

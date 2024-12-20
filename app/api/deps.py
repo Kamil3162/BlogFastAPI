@@ -20,7 +20,8 @@ from ..services.post import PostService
 from ..services.base import ServiceFactory
 from ..services.comment import CommentService
 from ..services.blacklist_token import BlackListTokenService
-from ..db.base import RedisClient
+from ..db.base import RedisConnectionClient
+
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl='token'
@@ -102,7 +103,7 @@ def get_comment_service(
     return ServiceFactory.get_instance(CommentService, db)
 
 def get_redis_service():
-    return ServiceFactory.get_redis_instance(RedisClient)
+    return ServiceFactory.get_redis_instance(RedisConnectionClient)
 
 def get_blacklisttoken_service(
     redis = Depends(get_redis_service)

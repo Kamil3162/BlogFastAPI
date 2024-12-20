@@ -38,13 +38,13 @@ class BrokerSettings:
 
 class RedisSettings(BaseSettings):
     host: str = "localhost"
-    password: str = "password"
+    password: str = ""
     db_name: str = "redis-handler"
     port: int = 6379
     db: int = 0
     per_page: int = 10
     stats_cache_connection: int = 300  # 5 minutes
-    decode_response: bool = True
+    decode_responses: bool = True
 
 settings = Settings()
 settings_redis = RedisSettings()
