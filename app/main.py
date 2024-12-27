@@ -16,14 +16,15 @@ from .core.handlers.req_handler import setup_server_exc_handler
 from .db.base import RedisConnectionClient
 import redis
 
-app = FastAPI(docs_url='/docs', redoc_url=None)
+app = FastAPI(docs_url="/docs", root_path="/api")
 redis_instance = RedisConnectionClient()
-r = redis.Redis()
+#r = redis.Redis()
 
 @app.on_event("startup")
 async def startup():
     init_db()
-    redis_instance.get()
+    #redis.ping()
+    #redis_instance.get()
 
 setup_exception_handlers(app=app)
 setup_server_exc_handler(app=app)
@@ -31,7 +32,7 @@ setup_server_exc_handler(app=app)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["https://kamilholub.pl", "https://www.kamilholub.pl"],
     allow_credentials=True,
     allow_methods=["*"],
     #allow_origin_regex="https?://.*",
@@ -49,5 +50,6 @@ app.include_router(api_router)
 env_path = Path(__file__).parent / 'config.env'
 load_dotenv(dotenv_path=env_path)
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=10000)
+#if __name__ == "__main__":
+#    uvicorn.run(app, host="127.0.0.1", port=10000)
+

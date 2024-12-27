@@ -1,19 +1,16 @@
 from typing import List
 
-from BlogFastAPI.app.schemas.comment import CommentScheme
 from sqlalchemy.orm import Session
 from sqlalchemy import exc
-from ..schemas.comment import (
-    CommentScheme
-)
 from fastapi import HTTPException, status
+
 from ..models.comment import Comment
 from ..utils.utils import CustomHTTPExceptions
 from ..utils.exceptions import NotFoundError
 from ..db.repositories.post import PostRepository
 from ..db.repositories.comments import CommentRepository
 from ..exceptions.comment import CommentNotFound, PermissionDenied
-
+from ..schemas.comment import CommentScheme
 
 class CommentService:
     def __init__(self, db):

@@ -2,13 +2,15 @@ version: '3.8'
 services:
   web:
     build: .
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+#    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    command: ["./entrypoint.sh"]
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     depends_on:
       - db
+      - redis
     environment:
 #      - DATABASE_URL=postgresql://postgres:admin@db:5432/FastApiBlogOfficial
       - POSTGRES_SERVER=db
@@ -26,6 +28,26 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
 
+  redis:
+    image: redis
+    container_name: chat_redis
+    ports:
+      - "6379:6379"
+    command: redis-server
+    volumes:
+      - redis_data:/data
+    networks:
+      - chat_network
+    restart: unless-stopped
+
+
+
 volumes:
   postgres_data:
+  redis_data:
+    driver: local
 
+networks:
+  chat_network:
+    name: chat_network
+    driver: bridge

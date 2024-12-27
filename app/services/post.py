@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from BlogFastAPI.app.schemas.user import UserResponse
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import (
@@ -12,6 +12,7 @@ from sqlalchemy.exc import (
     DatabaseError
 )
 
+from ..schemas.user import UserResponse
 from ..db.repositories.post import PostRepository
 from ..schemas.post import PostCreate, PostRead, PostWithComments, PostDelete,\
     PostShortInfo, PostUpdate

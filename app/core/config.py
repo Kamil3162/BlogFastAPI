@@ -37,7 +37,7 @@ class BrokerSettings:
         env_file = ".env"
 
 class RedisSettings(BaseSettings):
-    host: str = "localhost"
+    host: str = "0.0.0.0"
     password: str = ""
     db_name: str = "redis-handler"
     port: int = 6379
