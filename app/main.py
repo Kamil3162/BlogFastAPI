@@ -32,7 +32,7 @@ setup_server_exc_handler(app=app)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://kamilholub.pl", "https://www.kamilholub.pl"],
+    allow_origins=["test", "test"],
     allow_credentials=True,
     allow_methods=["*"],
     #allow_origin_regex="https?://.*",

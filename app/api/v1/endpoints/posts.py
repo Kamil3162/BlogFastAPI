@@ -17,12 +17,11 @@ router = APIRouter()
 db = get_db()
 post_service = PostService(db=db)
 
-@router.get("/post/{post_id}/", response_model=PostWithComments)
+@router.get("/post/", response_model=PostWithComments)
 async def get_post(
     post_id: int,
     post_service: PostService = Depends(get_post_service)
 ):
-    print(post_id)
     post = post_service.get_post_with_comments(post_id)
     return PostWithComments.model_validate(post)
 
