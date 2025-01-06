@@ -50,6 +50,6 @@ app.include_router(api_router)
 env_path = Path(__file__).parent / 'config.env'
 load_dotenv(dotenv_path=env_path)
 
-#if __name__ == "__main__":
-#    uvicorn.run(app, host="127.0.0.1", port=10000)
+if __name__ == "__main__":
+   uvicorn.run(app, host="127.0.0.1", port=10000)
 
