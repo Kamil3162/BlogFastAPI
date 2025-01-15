@@ -32,6 +32,8 @@ class User(Base):
                                      back_populates="user",
                                      uselist=False)
     post_votes = relationship("PostVote", back_populates="user")
+    post_views = relationship("PostView", back_populates="user")
+    views_detail = relationship("PostView", back_populates="user")
 
     def __str__(self):
         return f"User(id={self.id}, email='{self.email}', first_name='{self.first_name}', " \

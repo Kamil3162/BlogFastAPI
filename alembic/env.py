@@ -5,13 +5,22 @@ from sqlalchemy import pool
 from alembic import context
 
 #from app.models.user import User, BlacklistedUser
-from app.models.user import User, BlacklistedUser
-from app.models.category import PostCategory, PostCategories
-from app.models.comment import Comment
-from app.models.post import Post, PostView, PostVote
-from app.models.sections import Section
-from app.db.session import Base, engine
-from app.core.config import settings
+# from app.models.user import User, BlacklistedUser
+# from app.models.category import PostCategory, PostCategories
+# from app.models.comment import Comment
+# from app.models.post import Post, PostView, PostVote
+# from app.models.sections import Section
+# from app.db.session import Base, engine
+# from app.core.config import settings
+
+from BlogFastAPI.app.models.user import User, BlacklistedUser
+from BlogFastAPI.app.models.category import PostCategory, PostCategories
+from BlogFastAPI.app.models.comment import Comment
+from BlogFastAPI.app.models.post import Post, PostView, PostVote
+from BlogFastAPI.app.models.sections import Section
+from BlogFastAPI.app.db.session import Base, engine
+from BlogFastAPI.app.core.config import settings
+
 
 config = context.config
 

@@ -23,6 +23,11 @@ class Categories(enum.Enum):
     NEWS = "NEWS"
     PROGRESS = "PROGRESS"
 
+
 class VoteType(enum.Enum):
     UPVOTE = 1
     DOWNVOTE = -1
+
+
+class PostEarning(enum.Enum):
+    VIEW = 0.001

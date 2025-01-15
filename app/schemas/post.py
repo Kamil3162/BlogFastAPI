@@ -8,6 +8,16 @@ from .category import CategoryScheme
 from .user import UserResponse
 from ..core.enums import VoteType
 
+class PostInfo(BaseModel):
+    id: int
+    title: str
+    content: str
+    created_at: datetime
+    view_count: int
+
+    class Config:
+        from_attributes = True
+
 class PostCreate(BaseModel):
     title: str
     content: str

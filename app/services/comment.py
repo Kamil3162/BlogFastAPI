@@ -20,7 +20,9 @@ class CommentService:
 
     def comment_create(self, comment_create: CommentScheme):
         try:
-            post = PostRepository.get_by_id(self._db, comment_create.post_id)
+            post = self._post_repository.get_by_id(
+                post_id=comment_create.post_id
+            )
             if not post:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,

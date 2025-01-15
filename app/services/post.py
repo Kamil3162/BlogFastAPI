@@ -1,5 +1,4 @@
-from typing import List, Optional
-
+from typing import List, Optional, Union
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -11,6 +10,7 @@ from sqlalchemy.exc import (
     NoResultFound,
     DatabaseError
 )
+from decimal import Decimal
 
 from ..schemas.user import UserResponse
 from ..db.repositories.post import PostRepository
@@ -25,7 +25,7 @@ from ..exceptions.post import PostNotFound
 from ..db.repositories.posts_categories import PostsCategoriesRepository
 from ..models.post import Post, PostView, PostVote
 from ..core.enums import VoteType
-
+from ..core.enums import PostEarning
 
 class PostService:
     def __init__(self, db: Session):
@@ -34,18 +34,20 @@ class PostService:
         self._comment_service = CommentService(self._db)
         self._category_service = CategoryService(self._db)
         self._posts_categories = PostsCategoriesService(self._db)
+        self._post_view_service = PostViewService(self._db)
 
     def get_post_by_id(self, post_id: int) -> PostRead:
         """
         Get post by ID with error handling
         """
         try:
-            post = self._repository.get_by_id(self._db, post_id)
+            post = self._repository.get_by_id(post_id)
             if not post:
                 raise PostNotFound(
                     status_code=status.HTTP_404_NOT_FOUND,
                     description="Post not found"
                 )
+            self._post_view_service.post_upview(post_id=post_id)
             return PostRead.model_validate(post)
         except PostNotFound as e:
             raise HTTPException(
@@ -123,7 +125,7 @@ class PostService:
             # Get post
             post_id = post_data.id
 
-            post = self._repository.get_by_id(self._db, post_id)
+            post = self._repository.get_by_id(post_id)
 
             if not post:
                 raise PostNotFound(
@@ -178,7 +180,7 @@ class PostService:
 
     def get_posts_by_category(
             self,
-            category_name: str
+            category_id: int
     ) -> List[PostRead]:
         """
         Get all posts in a category
@@ -186,7 +188,7 @@ class PostService:
         try:
             posts = self._repository.get_by_category(
                 self._db,
-                category_name
+                category_id,
             )
             return [PostRead.model_validate(post) for post in posts]
         except Exception as e:
@@ -301,37 +303,39 @@ class PostVoteService:
         self._user_service = UserService(self._db)
         self._post_repository = PostRepository(self._db)
 
-    def post_vote_operation(self, user, post_data, vote_type: VoteType):
-        user = self._user_service.get_user_by_id(user.id)
-        post = self._post_service.get_post_by_id(post_data.id)
+    def post_vote_operation(self, user_id, post_id, vote_type: VoteType):
+        try:
+            user = self._user_service.get_user_by_id(user_id)
+            post = self._post_service.get_post_by_id(post_id)
 
-        post_vote = self._post_service._repository.get_vote_instance(
-            user_id=user.id,
-            post_id=post.id,
-            vote_type=vote_type
-        )
-
-        if not post_vote:
-            vote = self._post_repository.upvote_create(
+            post_vote = self._post_repository.get_vote_instance(
                 user_id=user.id,
-                post_id=post_data.id,
-                vote_type=vote_type
+                post_id=post.id,
             )
 
+            if not post_vote:
+                vote = self._post_repository.upvote_create(
+                    user_id=user.id,
+                    post_id=post.id,
+                    vote_type=vote_type
+                )
+            else:
+                post_vote.vote_type = vote_type
+
+            self._db.commit()
+
             return True
-
-        vote = self.post_vote_update(user.id, post_vote, vote_type=vote_type)
-
-        return True
+        except Exception as e:
+            raise e
 
     def post_vote_update(
         self,
         user_id,
-        post_vote: PostVote,
+        post_id: int,
         vote_type: VoteType
     ):
         vote_instance = self._post_repository.upvote_update(
-            post_id=post_vote.post_id,
+            post_id=post_id,
             user_id=user_id,
             vote_type=vote_type
         )
@@ -341,18 +345,82 @@ class PostVoteService:
 class PostViewService:
     def __init__(self, db: Session):
         self._db = db
-        self._post_service = PostService(self._db)
         self._user_repository = UserService(self._db)
         self._repository = PostsCategoriesRepository(self._db)
         self._post_repository = PostRepository(self._db)
 
-    def post_upview(self, user_id, post_id, user_ip: str = ""):
-        user = self._user_repository.get_user_by_id(user_id)
-        post = self._post_service.get_post_by_id(post_id)
+    def post_upview(self, post_id: int, user_id: int = 1,
+                    user_ip: str = "") -> bool:
+        """
+        Record a view for a post.
 
-        post_view = self._post_repository.create_post_view(
-            user_id=user.id,
-            post_id=post_id.id
+        Args:
+            post_id: ID of the post to view
+            user_id: ID of the viewing user (defaults to 1)
+            user_ip: IP address of the viewer
+
+        Raises:
+            NoResultFound: If post or user doesn't exist
+        """
+        try:
+            # Check if post exists
+            post = self._post_repository.get_by_id(post_id)
+            if not post:
+                raise NoResultFound(f"Post with id {post_id} not found")
+
+            # Get user
+            user = self._user_repository.get_user_by_id(user_id)
+            if not user:
+                raise NoResultFound(f"User with id {user_id} not found")
+
+            # Create post view
+            post_view = self._post_repository.create_post_view(
+                post_id=post.id,
+                user_id=user.id,
+                user_ip=user_ip
+            )
+
+            return True
+
+        except Exception as e:
+            self._db.rollback()
+            raise e
+
+    def get_views_by_user(self, user_id: int):
+        post_with_views = self._post_repository.get_post_info_by_user(
+            user_id=user_id
         )
+        return post_with_views
 
-        return True
+    def post_revenue(self, post_id: int):
+        total_views = self._post_repository.get_total_views(post_id=post_id)
+        return self.calculate_scaling_factor(total_views)
+
+    def scaled_revenue(self):
+        scaled_views = self._post_repository.get_platform_analytics()
+        return scaled_views
+
+    def revenue_by_months(self, post_id: int):
+        views_by_month = self._post_repository.get_views_by_months(
+            post_id=post_id
+        )
+        return self.calculate_scaling_factor(views_by_month)
+
+    def calculate_scaling_factor(self, views: Optional[dict]) -> float:
+        """
+            Function responsible for calculating the scaling factor
+            Args:
+                views
+
+            Returns:
+                Revenue scaling factor - float
+        """
+        scale = PostEarning.VIEW.value
+
+        if type(views) is List[int]:
+            month_views = [value * scale for key, value in views.items()]
+            return month_views
+
+        views = views.get(1)
+        return views * scale
+

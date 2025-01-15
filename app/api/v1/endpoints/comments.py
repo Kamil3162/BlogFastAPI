@@ -15,9 +15,10 @@ router = APIRouter()
 @router.post("/comment-create")
 async def comment_create(
     comment_data: CommentScheme,
-    current_user: User = Depends(get_current_active_user),
+    #current_user: User = Depends(get_current_active_user),
     comment_service: CommentService = Depends(get_comment_service)
 ):
+    comment_data.commentator_id = 1
     comment = comment_service.comment_create(comment_data)
     return comment
 

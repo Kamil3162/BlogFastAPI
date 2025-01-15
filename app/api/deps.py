@@ -16,7 +16,7 @@ from ..core.enums import UserRoles
 from ..utils.utils import get_db
 from ..services.categories import CategoryService
 from ..services.users import UserService
-from ..services.post import PostService
+from ..services.post import PostService, PostViewService, PostVoteService
 from ..services.base import ServiceFactory
 from ..services.comment import CommentService
 from ..services.blacklist_token import BlackListTokenService
@@ -102,6 +102,16 @@ def get_comment_service(
 ):
     return ServiceFactory.get_instance(CommentService, db)
 
+def get_post_view_service(
+    db: Session = Depends(get_db)
+):
+    return ServiceFactory.get_instance(PostViewService, db)
+
+def get_post_vote_service(
+    db: Session = Depends(get_db)
+):
+    return ServiceFactory.get_instance(PostVoteService, db)
+
 def get_redis_service():
     return ServiceFactory.get_redis_instance(RedisConnectionClient)
 
@@ -109,3 +119,4 @@ def get_blacklisttoken_service(
     redis = Depends(get_redis_service)
 ):
     return ServiceFactory.get_instance(redis)
+

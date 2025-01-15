@@ -58,3 +58,4 @@ async def category_update(
     category = category_service.category_update(category_data)
 
     return category
+

@@ -1,17 +1,25 @@
 import typing
+from http.client import HTTPResponse
 from typing import List, Optional
 
 from fastapi import Depends, Query
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
 
 from ....utils.utils import get_db
 from ....schemas.post import PostCreate, PostRead, PostUpdate, PostWithComments
 from ....models.user import User
-from ....services.post import PostService
+from ....services.post import PostService, PostViewService, PostVoteService
 from ....services.users import UserService
 from ....schemas.category import CategoryObject
-from ....api.deps import get_current_active_user, get_post_service
+from ....api.deps import (
+    get_current_active_user,
+    get_post_service,
+    get_post_view_service,
+    get_post_vote_service
+)
+from ....core.enums import VoteType
 
 router = APIRouter()
 db = get_db()
@@ -20,18 +28,47 @@ post_service = PostService(db=db)
 @router.get("/post/", response_model=PostWithComments)
 async def get_post(
     post_id: int,
-    post_service: PostService = Depends(get_post_service)
+    post_service: PostService = Depends(get_post_service),
+    post_view_service: PostViewService = Depends(get_post_view_service),
+    post_vote_service: PostVoteService = Depends(get_post_vote_service),
 ):
     post = post_service.get_post_with_comments(post_id)
+    boolen = post_view_service.post_upview(post_id=post_id)
+    up_post = post_vote_service.post_vote_operation(
+        user_id=1,
+        post_id=post_id,
+        vote_type=VoteType.DOWNVOTE,
+    )
+
     return PostWithComments.model_validate(post)
+
+@router.get("/post/{post_id}/")
+async def upvote_post(
+    post_id: int,
+    vote: int,
+    #current_user: User = Depends(get_current_active_user),
+    post_vote_service: PostVoteService = Depends(get_post_vote_service),
+):
+    post_vote = post_vote_service.post_vote_operation(
+        user_id=1,
+        post_id=post_id,
+        vote_type=VoteType(vote),
+    )
+
+    return JSONResponse(
+        status_code=200,
+        content="Proper post upvote",
+    )
 
 @router.get("/post-test/{post_id}/", response_model=PostRead)
 async def get_post(
     post_id: int,
     post_service: PostService = Depends(get_post_service),
+    post_view_service: PostViewService = Depends(get_post_view_service),
     # current_user: User = Depends(get_current_active_user)
 ):
     post = post_service.get_post_with_comments(post_id)
+    # post_view_service.get_post_with_comments(1, post_id, )
     return PostWithComments.model_validate(post)
 
 
@@ -109,6 +146,35 @@ async def delete_post(
 ):
     delete_status = post_service.delete_post(post_id)
     return delete_status
+
+@router.get("/posts/category")
+async def get_posts_by_category(
+    category_id: int,
+    post_service: PostService = Depends(get_post_service),
+    #user: User = Depends(get_current_active_user)
+):
+    posts = post_service.get_posts_by_category(category_id)
+
+    return posts
+
+@router.get("/posts/info")
+async def get_posts_by_category(
+    user_id: int,
+    post_service: PostService = Depends(get_post_service),
+    post_view_service: PostViewService = Depends(get_post_view_service),
+    #user: User = Depends(get_current_active_user)
+):
+    posts = post_view_service.get_views_by_user(user_id)
+    return posts
+
+
+@router.get("/admin/rating/{post_id}")
+async def admin_rating(
+    post_id: int,
+    post_view_service: PostViewService = Depends(get_post_view_service)
+):
+    result = post_view_service.revenue_by_months(post_id)
+    return result
 
 
 

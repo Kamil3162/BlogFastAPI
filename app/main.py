@@ -16,7 +16,14 @@ from .core.handlers.req_handler import setup_server_exc_handler
 from .db.base import RedisConnectionClient
 import redis
 
-app = FastAPI(docs_url="/docs", root_path="/api")
+app = FastAPI(
+    # Explicitly set OpenAPI URL relative to the root path
+    openapi_url="/openapi.json",
+    # Configure documentation URLs
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
 redis_instance = RedisConnectionClient()
 #r = redis.Redis()
 
@@ -32,15 +39,15 @@ setup_server_exc_handler(app=app)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["test", "test"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     #allow_origin_regex="https?://.*",
-    allow_headers=["*"
-        # "Access-Control-Allow-Headers","Content-Type", "Authorization",
-        # "Access-Control-Allow-Origin", "Set-Cookie"
-    ],
+    allow_headers=["*"],
 )
+# "Access-Control-Allow-Headers","Content-Type", "Authorization",
+# "Access-Control-Allow-Origin", "Set-Cookie"
+
 
 # app.add_middleware(DocsBlockMiddleware)
 # app.add_middleware(DataBaseErrorMiddleware)

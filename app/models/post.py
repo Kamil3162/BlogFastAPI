@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from sqlalchemy import (
-    Boolean,
     Column,
     ForeignKey,
     Integer,
@@ -33,7 +32,7 @@ class Post(Base):
     comments = relationship("Comment", back_populates="post")
     votes = relationship("PostVote", back_populates="post")
     views_detail = relationship("PostView", back_populates="post")
-    post_categories = relationship(
+    postCategories = relationship(
         "PostCategories",
         back_populates="post")
 
@@ -73,10 +72,11 @@ class PostView(Base):
     __tablename__ = "post_views"
 
     id = Column(Integer, primary_key=True, index=True)
-    post_id = Column(Integer, ForeignKey("posts.id"))
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
     viewer_ip = Column(String, nullable=True, default="127.0.0.1")
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)    # because user could be anonymous
     viewed_at = Column(DateTime(timezone=True), default=datetime.utcnow())
 
     post = relationship("Post", back_populates="views_detail")
+    user = relationship("User", back_populates="post_views")
 

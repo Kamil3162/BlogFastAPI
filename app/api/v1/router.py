@@ -7,7 +7,8 @@ from .endpoints import (
     comments,
     category,
     test,
-    ws
+    ws,
+    images
 )
 
 
@@ -24,3 +25,4 @@ api_router.include_router(category.router,
                           tags=["categories"])
 api_router.include_router(test.router, prefix="/test", tags=["test"])
 api_router.include_router(ws.router, prefix="/ws", tags=["ws"])
+api_router.include_router(images.router, prefix="/image", tags=["images"])

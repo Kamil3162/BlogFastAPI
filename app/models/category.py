@@ -25,6 +25,7 @@ class PostCategory(Base):
         back_populates="category"
     )
 
+
 class PostCategories(Base):
     __tablename__ = "posts_categories"
 
@@ -32,7 +33,7 @@ class PostCategories(Base):
     post_id = Column(Integer, ForeignKey("posts.id"))
     category_id = Column(Integer, ForeignKey("categories.id"))
 
-    post = relationship("Post", back_populates="post_categories")
+    post = relationship("Post", back_populates="postCategories")
     category = relationship(
         "PostCategory",
         back_populates="post_categories")

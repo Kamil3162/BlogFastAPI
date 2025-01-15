@@ -1,13 +1,14 @@
-from datetime import datetime
-
-import boto3
-from botocore.exceptions import (
-    ClientError,
-    NoCredentialsError,
-    ParamValidationError
-)
-import logging
 import os
+import logging
+from datetime import datetime
+from io import BytesIO
+from pathlib import Path
+
+from PIL import Image
+import boto3
+
+
+os.path.join(r"C:\Users\kamil\Downloads")
 
 class S3Client:
     def __init__(
@@ -79,14 +80,53 @@ class S3Client:
     def s3_list_objects(self):
         s3_objects = self.client.list_objects(Bucket=self.bucket_name)
         try:
-            print(s3_objects.get('Contents'))
+            image_data = s3_objects.get('Contents')
+            image_key = image_data[0].get('Key')
+            response = self.client.get_object(Bucket=self.bucket_name, Key=image_key)
+            img = Image.open(BytesIO(response['Body'].read()))
+            img.show()
         except KeyError as e:
             print("Dict have a following key")
 
+    def upload_s3_image(self, file_path, s3_key=None):
+        """
+        Upload an image to S3.
+        Args:
+            file_path (str): Path to the image file
+        """
+        from pathlib import Path
+
+        if s3_key is None:
+            s3_key = Path(file_path).name
+
+        try:
+            self.client.upload_file(
+                str(file_path),
+                Bucket=self.bucket_name,
+                Key=str(s3_key)
+            )
+            print("file has been uploaded")
+        except Exception as e:
+            print(f"Error uploading file: {e}")
+
 
 S3Instance = S3Client(
-
 )
 
+print(os.path.exists(r"C:\Users\kamil\Downloads"))
+
+image_path = Path.home() / "Downloads" / "info.png"
+
+print(image_path)
+
+
+print(image_path)
+print(Path.home())
+print(Path.cwd())
+
 S3Instance.initialise_client()
-S3Instance.s3_list_objects()
+# S3Instance.s3_list_objects()
+
+if image_path.exists():
+    print("Image already exists")
+    # S3Instance.upload_s3_image(image_path)
