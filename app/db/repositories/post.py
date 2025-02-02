@@ -1,12 +1,13 @@
 import typing
 from datetime import datetime, timezone
-from itertools import count
+from itertools import count, groupby
 
 from sqlalchemy import exc, desc, select, func, extract
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ...models.post import Post, PostVote, PostView
+from ...models.user import User
 from ...models.category import PostCategory, PostCategories
 from ...schemas.post import PostCreate, PostUpdate, PostInfo
 from ...core.enums import VoteType
@@ -300,6 +301,33 @@ class PostRepository:
         result = self._db.execute(query)
         return result.scalar_one()
 
+    def get_generated_views(self, user: id):
+        """
+            Gets the total view count for a user.
+            FUnction generate a result for owner using all created posts.
+            Result is broke on months and return total views in each month.
+
+            Params:
+                user (int): ID of the user
+
+            Returns:
+                - dict[str, int]: Total view count
+        """
+        query = select(
+            extract("month", PostView.viewed_at).label("month"),
+            func.count().label("total_views")
+        ).select_from(PostView) \
+         .join(Post, Post.owner_id == user.id) \
+         .where(Post.owner_id == user.id) \
+         .group_by(
+            extract("month", PostView.viewed_at)
+        )
+
+        result = self._db.execute(query)
+        rows = result.all()
+        return dict(rows)
+
+
     def get_post_info_by_user(self, user_id: int):
         """
         Gets posts information with view counts for a specific user.
@@ -345,7 +373,6 @@ class PostRepository:
         query = (
             select(
                 extract('month', PostView.viewed_at).label('month'),
-                # Get month number
                 func.count(PostView.id).label('view_count')  # Count views
             )
             .where(PostView.post_id == post_id)
@@ -366,6 +393,55 @@ class PostRepository:
             return monthly_views
         except Exception as e:
             raise e
+
+    def get_monthly_views_by_user(self, user_id: int):
+        """
+            Generate accumulated views for each month for a given user.
+
+            Function generate accumulated views for each month which post creator
+            generate during create a brand new post or existing views
+
+            Returns:
+                Dict[id: [dict]] where:
+                    - id: particular post id
+                    - dict: { month: views}
+
+            Example:
+                {
+                    1: {"January" : 32321, "February": 32132132}
+                }
+        """
+        query = select(
+            PostView.post_id,
+            extract('month', PostView.viewed_at).label('month'),
+            extract('year', PostView.viewed_at).label('year'),
+            Post.owner_id,
+            # Added this since you're using it in the return dict
+            func.count(PostView.id).label("view_count"),
+        ).select_from(PostView) \
+         .join(Post, Post.id == PostView.post_id) \
+         .join(User, User.id == Post.owner_id) \
+         .where(PostView.user_id == user_id) \
+         .group_by(
+            extract('month', PostView.viewed_at),
+            extract('year', PostView.viewed_at),
+            PostView.post_id,
+            Post.owner_id  # Added to group by since it's in select
+        )
+
+        result = self._db.execute(query)  # Assuming async
+        rows = result.all()
+
+        return [
+            {
+                "month": int(row.month),
+                "year": int(row.year),
+                "post_id": row.post_id,
+                "owner_id": row.owner_id,
+                "view_count": row.view_count
+            }
+            for row in rows
+        ]
 
     def get_global_views_by_months(self) -> typing.Dict[int, int]:
         """

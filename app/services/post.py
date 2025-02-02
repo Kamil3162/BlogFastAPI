@@ -424,3 +424,24 @@ class PostViewService:
         views = views.get(1)
         return views * scale
 
+    def generate_posts_views_monthly(self, user_id: int):
+        try:
+            monthly_views = self._post_repository.get_monthly_views_by_user(
+                user_id=user_id
+            )
+
+            if not monthly_views:
+                raise NoResultFound
+
+            return monthly_views
+        except Exception as e:
+            raise e
+
+    def generate_views_monthly(self, user_id: int):
+        try:
+            monthly_views = self._post_repository.get_generated_views(
+                user_id=user_id
+            )
+            return monthly_views
+        except Exception as e:
+            raise e

@@ -135,7 +135,6 @@ async def post_list(
     page: int = Query(1, gt=0),
     post_service: PostService = Depends(get_post_service),
 ):
-    print(page)
     return post_service.get_post_list(page=page, limit=10)
 
 @router.delete("/post-delete/{post_id}/")
@@ -154,27 +153,9 @@ async def get_posts_by_category(
     #user: User = Depends(get_current_active_user)
 ):
     posts = post_service.get_posts_by_category(category_id)
-
-    return posts
-
-@router.get("/posts/info")
-async def get_posts_by_category(
-    user_id: int,
-    post_service: PostService = Depends(get_post_service),
-    post_view_service: PostViewService = Depends(get_post_view_service),
-    #user: User = Depends(get_current_active_user)
-):
-    posts = post_view_service.get_views_by_user(user_id)
     return posts
 
 
-@router.get("/admin/rating/{post_id}")
-async def admin_rating(
-    post_id: int,
-    post_view_service: PostViewService = Depends(get_post_view_service)
-):
-    result = post_view_service.revenue_by_months(post_id)
-    return result
 
 
 

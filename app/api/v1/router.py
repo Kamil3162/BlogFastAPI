@@ -8,7 +8,8 @@ from .endpoints import (
     category,
     test,
     ws,
-    images
+    images,
+    statistic
 )
 
 
@@ -26,3 +27,4 @@ api_router.include_router(category.router,
 api_router.include_router(test.router, prefix="/test", tags=["test"])
 api_router.include_router(ws.router, prefix="/ws", tags=["ws"])
 api_router.include_router(images.router, prefix="/image", tags=["images"])
+api_router.include_router(statistic.router, prefix="/statistic", tags=["statistic"])

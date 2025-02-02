@@ -25,7 +25,6 @@ app = FastAPI(
 )
 
 redis_instance = RedisConnectionClient()
-#r = redis.Redis()
 
 @app.on_event("startup")
 async def startup():
@@ -35,7 +34,6 @@ async def startup():
 
 setup_exception_handlers(app=app)
 setup_server_exc_handler(app=app)
-
 
 app.add_middleware(
     CORSMiddleware,
