@@ -17,9 +17,11 @@ from ....api.deps import (
     get_current_active_user,
     get_post_service,
     get_post_view_service,
-    get_post_vote_service
+    get_post_vote_service,
+
 )
 from ....core.enums import VoteType
+from ....storage.files import file_service
 
 router = APIRouter()
 db = get_db()

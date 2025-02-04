@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ....schemas.user import UserSchemeOfficial, UserUpdate, UserRoleScheme
+from ....schemas.user import UserSchemeOfficial, UserUpdate, UserRoleScheme, UserUpdateScheme
 from ....core.security import USER_AUTH, oauth2_scheme, check_token_status
 from ....api.deps import get_current_active_user, get_admin_user
 from ....core.enums import UserRoles
@@ -44,7 +44,7 @@ async def get_user(
 @router.put("/user-update/{user_id}/", response_model=UserSchemeOfficial)
 async def update_user(
         user_id: int,
-        user_data: UserUpdate,
+        user_data: UserUpdateScheme,
         current_user: User = CommonDeps,
         user_service: UserService = Depends(get_user_service)
 ):

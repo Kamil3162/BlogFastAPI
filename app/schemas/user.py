@@ -50,6 +50,14 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
 
 
+class UserUpdateScheme:
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    password: Optional[str] = None
+    email: Optional[EmailStr] = None
+    role: Optional[UserRoles] = None
+    active: Optional[bool] = None
+
 class BlacklistedUserSchema(BaseModel):
     id: int
     user_id: int
