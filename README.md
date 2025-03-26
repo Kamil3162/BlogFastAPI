@@ -63,4 +63,3 @@ Projekt wykorzystuje GitHub Actions do automatyzacji procesów CI/CD. Workflow j
 2. **Test** - uruchamianie testów pytest
 3. **Deploy** - wdrażanie aplikacji
 
-## Ostatnie zmiany
