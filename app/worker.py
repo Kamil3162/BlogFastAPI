@@ -10,3 +10,5 @@ celery.autodiscover_tasks(["app.tasks"])
 @celery.task(name="example_task")
 def example_task(name:str):
     return f"Hello, {name}!"
+
+# this is random tekst to check it out
