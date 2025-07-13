@@ -51,3 +51,4 @@ networks:
   chat_network:
     name: chat_network
     driver: bridge
+
